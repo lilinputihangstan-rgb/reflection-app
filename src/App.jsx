@@ -599,7 +599,7 @@ export default function Reflection() {
   const [tab, setTab] = useState("feed");
   const [ready, setReady] = useState(false);
   const [session, setSession] = useState(null);
-  const account = session ? { userId: session.user.id } : null; // derived, keeps rest of the app unchanged
+  const account = useMemo(() => (session ? { userId: session.user.id } : null), [session]); // derived, keeps rest of the app unchanged
   const [myProfile, setMyProfile] = useState(null);
   const [entries, setEntries] = useState([]);
   const [mood, setMood] = useState("calm");
