@@ -557,6 +557,8 @@ const GlobalStyle = ({ theme, fontFamily }) => (
     textarea.rf-textarea { line-height: 1.6; resize: vertical; min-height: 130px; border-radius: 4px 16px 4px 16px; padding: 16px; }
     .rf-icon-btn { background: none; border: none; cursor: pointer; color: var(--ink-soft); font-size: 13px; display: flex; align-items: center; gap: 5px; padding: 4px 6px; border-radius: 8px; }
     .rf-icon-btn:hover { background: var(--paper); }
+    .rf-auth-input::placeholder { color: rgba(229,231,235,0.4); }
+    .rf-auth-input:focus { outline: 2px solid rgba(229,193,181,0.5); outline-offset: 1px; }
     @media (prefers-reduced-motion: reduce) { .rf-btn { transition: none; } }
   `}</style>
 );
@@ -1248,68 +1250,131 @@ export default function Reflection() {
 
   if (!session) {
     return (
-      <div style={{ minHeight: "100vh", background: "var(--paper)", fontFamily: "'Work Sans', sans-serif", color: "var(--ink)" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          fontFamily: "'Work Sans', sans-serif",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+          position: "relative",
+          overflow: "hidden",
+          background:
+            "radial-gradient(circle at 25% 15%, rgba(229,193,181,0.16), transparent 45%), radial-gradient(circle at 80% 75%, rgba(142,106,94,0.20), transparent 50%), linear-gradient(160deg, #0b1220 0%, #16202f 45%, #1c2436 75%, #241d2c 100%)",
+        }}
+      >
         <GlobalStyle theme={THEMES[themeKey]} fontFamily={currentFont} />
-        <SceneBackground sceneKey={sceneKey} />
-        {sceneOverlay}
-        <div style={{ maxWidth: 420, margin: "80px auto", padding: "0 20px", textAlign: "center" }}>
-          <h1 className="rf-display" style={{ fontSize: 34, color: "var(--clay-dark)", marginBottom: 8 }}>{t.appName}</h1>
-          <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 32, lineHeight: 1.6 }}>{t.tagline}</p>
+        {/* dark overlay to mimic a dim sunset photo backdrop, per spec opacity 0.6 */}
+        <div style={{ position: "absolute", inset: 0, background: "#0a0e17", opacity: 0.6, pointerEvents: "none" }} />
+
+        <div
+          className="rf-auth-card"
+          style={{
+            position: "relative",
+            zIndex: 1,
+            width: "100%",
+            maxWidth: 400,
+            background: "rgba(30, 41, 59, 0.65)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            borderRadius: 16,
+            padding: "32px 28px",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+            textAlign: "center",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+            <svg viewBox="0 0 200 200" width="86" height="86">
+              <defs>
+                <linearGradient id="roseGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#E5C1B5" />
+                  <stop offset="50%" stopColor="#C29B8C" />
+                  <stop offset="100%" stopColor="#8E6A5E" />
+                </linearGradient>
+              </defs>
+              <circle cx="100" cy="95" r="75" fill="none" stroke="url(#roseGold)" strokeWidth="3.5" opacity="0.85" />
+              <circle cx="100" cy="95" r="83" fill="none" stroke="url(#roseGold)" strokeWidth="1.5" opacity="0.4" strokeDasharray="4 4" />
+              <path d="M100 35 C110 50, 112 65, 100 78 C88 65, 90 50, 100 35 Z" fill="none" stroke="url(#roseGold)" strokeWidth="2.5" />
+              <path d="M97 50 L97 68 M97 50 C103 50, 105 55, 102 60 C99 63, 97 60, 97 60 L103 68" fill="none" stroke="url(#roseGold)" strokeWidth="2" strokeLinecap="round" />
+              <path d="M96 75 C80 70, 68 55, 75 42 C85 52, 92 65, 96 75 Z" fill="none" stroke="url(#roseGold)" strokeWidth="2" />
+              <path d="M104 75 C120 70, 132 55, 125 42 C115 52, 108 65, 104 75 Z" fill="none" stroke="url(#roseGold)" strokeWidth="2" />
+              <circle cx="100" cy="98" r="7.5" fill="url(#roseGold)" />
+              <path d="M100 108 C93 112, 85 118, 80 128 C88 132, 95 130, 100 130 C105 130, 112 132, 120 128 C115 118, 107 112, 100 108 Z" fill="url(#roseGold)" />
+              <path d="M86 120 C80 125, 75 135, 82 138 C90 138, 96 133, 100 132 C104 132, 110 138, 118 138 C125 135, 120 125, 114 120" fill="none" stroke="url(#roseGold)" strokeWidth="3" strokeLinecap="round" />
+              <line x1="55" y1="145" x2="145" y2="145" stroke="url(#roseGold)" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="68" y1="151" x2="132" y2="151" stroke="url(#roseGold)" strokeWidth="1.8" strokeLinecap="round" opacity="0.85" />
+              <line x1="80" y1="156" x2="120" y2="156" stroke="url(#roseGold)" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
+            </svg>
+          </div>
+
+          <h1
+            className="rf-display"
+            style={{ fontSize: 32, fontStyle: "italic", color: "#E5C1B5", marginBottom: 8, letterSpacing: 0.2 }}
+          >
+            {t.appName}
+          </h1>
+          <p style={{ color: "rgba(229,231,235,0.65)", fontSize: 14, marginBottom: 26, lineHeight: 1.6 }}>{t.tagline}</p>
+
           <button
             className="rf-btn"
             onClick={signInWithGoogle}
             style={{
-              background: "var(--paper-card)", border: "1px solid var(--line)", color: "var(--ink)",
-              padding: "13px 26px", fontSize: 15, display: "inline-flex", alignItems: "center", gap: 10,
+              width: "100%", boxSizing: "border-box",
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.16)", color: "#f1ede9",
+              padding: "13px 26px", fontSize: 15, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 10,
             }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.71A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.71V4.96H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.04l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l2.99 2.33C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
             Masuk dengan Google
           </button>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
-            <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
-            <span style={{ fontSize: 12, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: 0.5 }}>{t.orDivider}</span>
-            <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "22px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.14)" }} />
+            <span style={{ fontSize: 12, color: "rgba(229,231,235,0.5)" }}>{t.orDivider}</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.14)" }} />
           </div>
 
           <form onSubmit={handleEmailAuthSubmit} style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12 }}>
-            <div>
-              <label style={{ fontSize: 13, color: "var(--ink-soft)", display: "block", marginBottom: 4 }}>{t.authEmailLabel}</label>
-              <input
-                type="email"
-                autoComplete="email"
-                value={authEmail}
-                onChange={(e) => setAuthEmail(e.target.value)}
-                placeholder={t.authEmailPh}
-                className="rf-input"
-                style={{ width: "100%", boxSizing: "border-box", padding: "11px 14px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--paper-card)", color: "var(--ink)", fontSize: 14, fontFamily: "'Work Sans', sans-serif" }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: 13, color: "var(--ink-soft)", display: "block", marginBottom: 4 }}>{t.authPasswordLabel}</label>
-              <input
-                type="password"
-                autoComplete={authMode === "login" ? "current-password" : "new-password"}
-                value={authPassword}
-                onChange={(e) => setAuthPassword(e.target.value)}
-                placeholder={t.authPasswordPh}
-                className="rf-input"
-                style={{ width: "100%", boxSizing: "border-box", padding: "11px 14px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--paper-card)", color: "var(--ink)", fontSize: 14, fontFamily: "'Work Sans', sans-serif" }}
-              />
-            </div>
+            <input
+              type="email"
+              autoComplete="email"
+              value={authEmail}
+              onChange={(e) => setAuthEmail(e.target.value)}
+              placeholder={t.authEmailPh}
+              className="rf-auth-input"
+              style={{
+                width: "100%", boxSizing: "border-box", padding: "13px 16px", borderRadius: 10,
+                border: "1px solid rgba(255,255,255,0.14)", background: "rgba(15,20,30,0.55)", color: "#f1ede9",
+                fontSize: 14, fontFamily: "'Work Sans', sans-serif",
+              }}
+            />
+            <input
+              type="password"
+              autoComplete={authMode === "login" ? "current-password" : "new-password"}
+              value={authPassword}
+              onChange={(e) => setAuthPassword(e.target.value)}
+              placeholder={t.authPasswordPh}
+              className="rf-auth-input"
+              style={{
+                width: "100%", boxSizing: "border-box", padding: "13px 16px", borderRadius: 10,
+                border: "1px solid rgba(255,255,255,0.14)", background: "rgba(15,20,30,0.55)", color: "#f1ede9",
+                fontSize: 14, fontFamily: "'Work Sans', sans-serif",
+              }}
+            />
 
-            {authError && <p style={{ color: "#B5654A", fontSize: 13, margin: 0 }}>{authError}</p>}
-            {authNotice && <p style={{ color: "var(--ink-soft)", fontSize: 13, margin: 0 }}>{authNotice}</p>}
+            {authError && <p style={{ color: "#e8a191", fontSize: 13, margin: 0 }}>{authError}</p>}
+            {authNotice && <p style={{ color: "rgba(229,231,235,0.7)", fontSize: 13, margin: 0 }}>{authNotice}</p>}
 
             <button
               type="submit"
               className="rf-btn"
               disabled={authLoading}
               style={{
-                background: "var(--clay-dark)", border: "none", color: "#fff",
+                background: "linear-gradient(135deg, #C29B8C 0%, #8E6A5E 100%)", border: "none", color: "#fff",
                 padding: "13px 26px", fontSize: 15, borderRadius: 10, cursor: authLoading ? "default" : "pointer",
-                opacity: authLoading ? 0.7 : 1,
+                opacity: authLoading ? 0.7 : 1, boxShadow: "0 8px 20px rgba(142,106,94,0.35)",
               }}
             >
               {authMode === "login"
@@ -1324,7 +1389,7 @@ export default function Reflection() {
                 setAuthError("");
                 setAuthNotice("");
               }}
-              style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 13, textDecoration: "underline", cursor: "pointer", padding: 4 }}
+              style={{ background: "none", border: "none", color: "rgba(229,231,235,0.6)", fontSize: 13, textDecoration: "underline", cursor: "pointer", padding: 4 }}
             >
               {authMode === "login" ? t.authSwitchToSignup : t.authSwitchToLogin}
             </button>
