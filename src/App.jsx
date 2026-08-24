@@ -25,6 +25,21 @@ const T = {
     chooseAvatar: "Pilih avatar",
     createProfile: "Buat profil",
     googleNote: "Kamu sudah masuk dengan Google. Lengkapi profil ini untuk mulai menggunakan Reflection.",
+    orDivider: "atau",
+    authEmailLabel: "Email", authEmailPh: "kamu@email.com",
+    authPasswordLabel: "Kata sandi", authPasswordPh: "Minimal 6 karakter",
+    authLoginBtn: "Masuk", authLoginBtnLoading: "Masuk…",
+    authSignupBtn: "Daftar akun baru", authSignupBtnLoading: "Mendaftar…",
+    authSwitchToSignup: "Belum punya akun? Daftar",
+    authSwitchToLogin: "Sudah punya akun? Masuk",
+    authFillBoth: "Isi email dan kata sandi dulu ya.",
+    authPasswordTooShort: "Kata sandi minimal 6 karakter.",
+    authCheckEmail: "Cek email kamu untuk konfirmasi sebelum bisa masuk.",
+    authErrInvalid: "Email atau kata sandi salah.",
+    authErrExists: "Email ini sudah terdaftar. Coba masuk saja.",
+    authErrNotConfirmed: "Email belum dikonfirmasi. Cek inbox kamu dulu.",
+    authErrRateLimit: "Terlalu banyak percobaan. Coba lagi sebentar lagi.",
+    authErrGeneric: "Ada masalah, coba lagi.",
     greetingPrefix: "Selamat",
     morning: "pagi", afternoon: "siang", evening: "sore", night: "malam",
     promptLabel: "Renungan hari ini",
@@ -122,6 +137,21 @@ const T = {
     chooseAvatar: "Choose an avatar",
     createProfile: "Create profile",
     googleNote: "You're signed in with Google. Complete this profile to start using Reflection.",
+    orDivider: "or",
+    authEmailLabel: "Email", authEmailPh: "you@email.com",
+    authPasswordLabel: "Password", authPasswordPh: "At least 6 characters",
+    authLoginBtn: "Sign in", authLoginBtnLoading: "Signing in…",
+    authSignupBtn: "Create account", authSignupBtnLoading: "Creating account…",
+    authSwitchToSignup: "Don't have an account? Sign up",
+    authSwitchToLogin: "Already have an account? Sign in",
+    authFillBoth: "Please fill in both email and password.",
+    authPasswordTooShort: "Password must be at least 6 characters.",
+    authCheckEmail: "Check your email to confirm before signing in.",
+    authErrInvalid: "Invalid email or password.",
+    authErrExists: "This email is already registered. Try signing in instead.",
+    authErrNotConfirmed: "Email not confirmed yet. Check your inbox first.",
+    authErrRateLimit: "Too many attempts. Please try again shortly.",
+    authErrGeneric: "Something went wrong, please try again.",
     greetingPrefix: "Good",
     morning: "morning", afternoon: "afternoon", evening: "evening", night: "evening",
     promptLabel: "Today's reflection",
@@ -376,6 +406,16 @@ function SceneBackground({ sceneKey }) {
 function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
+function mapAuthError(message = "", t) {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials")) return t.authErrInvalid;
+  if (m.includes("already registered") || m.includes("already exists") || m.includes("user already"))
+    return t.authErrExists;
+  if (m.includes("email not confirmed")) return t.authErrNotConfirmed;
+  if (m.includes("password") && m.includes("least")) return t.authPasswordTooShort;
+  if (m.includes("rate limit")) return t.authErrRateLimit;
+  return message || t.authErrGeneric;
+}
 function dayOfYear(d) {
   const start = new Date(d.getFullYear(), 0, 0);
   return Math.floor((d - start) / 86400000);
@@ -600,6 +640,12 @@ export default function Reflection() {
   const [ready, setReady] = useState(false);
   const [session, setSession] = useState(null);
   const account = useMemo(() => (session ? { userId: session.user.id } : null), [session]); // derived, keeps rest of the app unchanged
+  const [authMode, setAuthMode] = useState("login"); // "login" | "signup"
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [authNotice, setAuthNotice] = useState("");
   const [myProfile, setMyProfile] = useState(null);
   const [entries, setEntries] = useState([]);
   const [mood, setMood] = useState("calm");
@@ -720,6 +766,45 @@ export default function Reflection() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleEmailAuthSubmit = async (e) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthNotice("");
+    if (!authEmail || !authPassword) {
+      setAuthError(t.authFillBoth);
+      return;
+    }
+    if (authPassword.length < 6) {
+      setAuthError(t.authPasswordTooShort);
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      if (authMode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: authEmail.trim(),
+          password: authPassword,
+        });
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase.auth.signUp({
+          email: authEmail.trim(),
+          password: authPassword,
+        });
+        if (error) throw error;
+        // If email confirmation is required, there will be no active session yet.
+        if (data?.user && !data?.session) {
+          setAuthNotice(t.authCheckEmail);
+          setAuthPassword("");
+        }
+      }
+    } catch (err) {
+      setAuthError(mapAuthError(err?.message, t));
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const createAccount = async (profileData) => {
@@ -1181,6 +1266,69 @@ export default function Reflection() {
             <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.71A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.71V4.96H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.04l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l2.99 2.33C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
             Masuk dengan Google
           </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
+            <span style={{ fontSize: 12, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: 0.5 }}>{t.orDivider}</span>
+            <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
+          </div>
+
+          <form onSubmit={handleEmailAuthSubmit} style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 13, color: "var(--ink-soft)", display: "block", marginBottom: 4 }}>{t.authEmailLabel}</label>
+              <input
+                type="email"
+                autoComplete="email"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                placeholder={t.authEmailPh}
+                className="rf-input"
+                style={{ width: "100%", boxSizing: "border-box", padding: "11px 14px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--paper-card)", color: "var(--ink)", fontSize: 14, fontFamily: "'Work Sans', sans-serif" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: "var(--ink-soft)", display: "block", marginBottom: 4 }}>{t.authPasswordLabel}</label>
+              <input
+                type="password"
+                autoComplete={authMode === "login" ? "current-password" : "new-password"}
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                placeholder={t.authPasswordPh}
+                className="rf-input"
+                style={{ width: "100%", boxSizing: "border-box", padding: "11px 14px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--paper-card)", color: "var(--ink)", fontSize: 14, fontFamily: "'Work Sans', sans-serif" }}
+              />
+            </div>
+
+            {authError && <p style={{ color: "#B5654A", fontSize: 13, margin: 0 }}>{authError}</p>}
+            {authNotice && <p style={{ color: "var(--ink-soft)", fontSize: 13, margin: 0 }}>{authNotice}</p>}
+
+            <button
+              type="submit"
+              className="rf-btn"
+              disabled={authLoading}
+              style={{
+                background: "var(--clay-dark)", border: "none", color: "#fff",
+                padding: "13px 26px", fontSize: 15, borderRadius: 10, cursor: authLoading ? "default" : "pointer",
+                opacity: authLoading ? 0.7 : 1,
+              }}
+            >
+              {authMode === "login"
+                ? (authLoading ? t.authLoginBtnLoading : t.authLoginBtn)
+                : (authLoading ? t.authSignupBtnLoading : t.authSignupBtn)}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode((m) => (m === "login" ? "signup" : "login"));
+                setAuthError("");
+                setAuthNotice("");
+              }}
+              style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 13, textDecoration: "underline", cursor: "pointer", padding: 4 }}
+            >
+              {authMode === "login" ? t.authSwitchToSignup : t.authSwitchToLogin}
+            </button>
+          </form>
         </div>
       </div>
     );
