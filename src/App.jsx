@@ -515,6 +515,7 @@ function mapPostRow(row, likes = [], comments = []) {
   return {
     id: row.id,
     userId: row.user_id,
+    entryId: row.entry_id || null,
     ts: new Date(row.ts).getTime(),
     mood: row.mood,
     text: row.text,
@@ -1165,6 +1166,7 @@ export default function Reflection() {
         await supabase.from("posts").insert({
           user_id: account.userId, mood, text: entry.text,
           title: title.trim() || null, media_url: mediaUrl, media_type: mType,
+          entry_id: entry.id,
         });
       }
       setText(""); setTitle(""); clearMedia(); setPublish(false); setSaveState("saved");
@@ -1177,6 +1179,10 @@ export default function Reflection() {
 
   const handleDelete = async (id) => {
     setEntries((prev) => prev.filter((e) => e.id !== id));
+    // Kalau refleksi ini pernah dipublikasikan, hapus juga dari tampilan Beranda/Profil.
+    // Baris di tabel "posts" ikut terhapus otomatis lewat ON DELETE CASCADE di database.
+    setFeed((prev) => prev.filter((p) => p.entryId !== id));
+    setViewedPosts((prev) => prev.filter((p) => p.entryId !== id));
     try {
       await supabase.from("journal_entries").delete().eq("id", id);
     } catch (e) {}
