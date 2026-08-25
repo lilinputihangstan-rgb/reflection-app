@@ -61,6 +61,10 @@ const T = {
     calendarClose: "Tutup kalender",
     calendarShowAll: "Tampilkan semua",
     calendarNoEntries: "Belum ada refleksi di tanggal ini.",
+    translateBtn: "🌐 Terjemahkan",
+    showOriginal: "Tampilkan teks asli",
+    translating: "Menerjemahkan…",
+    translateError: "Gagal menerjemahkan, coba lagi.",
     empty_journal: "Belum ada refleksi. Tulisan pertamamu akan muncul di sini.",
     streak: "hari beruntun",
     totalEntries: "total refleksi",
@@ -184,6 +188,10 @@ const T = {
     calendarClose: "Close calendar",
     calendarShowAll: "Show all",
     calendarNoEntries: "No reflections on this date yet.",
+    translateBtn: "🌐 Translate",
+    showOriginal: "Show original text",
+    translating: "Translating…",
+    translateError: "Translation failed, try again.",
     empty_journal: "No reflections yet. Your first entry will appear here.",
     streak: "day streak",
     totalEntries: "total entries",
@@ -513,6 +521,34 @@ function sameDay(ts, date) {
   const d = new Date(ts);
   return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate();
 }
+async function translateChunk(text, target, source) {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${source}|${target}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("translate_failed");
+  const data = await res.json();
+  const out = data?.responseData?.translatedText;
+  if (!out || String(out).toUpperCase().includes("MYMEMORY WARNING")) throw new Error("translate_failed");
+  return out;
+}
+async function translateLongText(text, target, source) {
+  if (!text) return "";
+  if (text.length <= 480) return translateChunk(text, target, source);
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const chunks = [];
+  let cur = "";
+  for (const s of sentences) {
+    if ((cur + " " + s).trim().length > 450) {
+      if (cur) chunks.push(cur.trim());
+      cur = s;
+    } else {
+      cur = (cur + " " + s).trim();
+    }
+  }
+  if (cur) chunks.push(cur);
+  const results = [];
+  for (const c of chunks) results.push(await translateChunk(c, target, source));
+  return results.join(" ");
+}
 function MediaBlock({ url, type, alt = "" }) {
   if (!url) return null;
   return (
@@ -764,6 +800,7 @@ export default function Reflection() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
   const [selectedDate, setSelectedDate] = useState(null);
+  const [translations, setTranslations] = useState({});
   const [promptIndex, setPromptIndex] = useState(0);
   const [saveState, setSaveState] = useState("idle");
   const [feed, setFeed] = useState([]);
@@ -1037,6 +1074,24 @@ export default function Reflection() {
     setMediaPreview(null);
     setMediaType(null);
     setMediaError("");
+  };
+
+  const handleTranslate = async (key, titleText, bodyText) => {
+    const existing = translations[key];
+    if (existing && existing.text) {
+      setTranslations((prev) => ({ ...prev, [key]: { ...prev[key], showing: !prev[key].showing } }));
+      return;
+    }
+    setTranslations((prev) => ({ ...prev, [key]: { loading: true, showing: true } }));
+    const target = lang;
+    const source = target === "en" ? "id" : "en";
+    try {
+      const tText = await translateLongText(bodyText, target, source);
+      const tTitle = titleText ? await translateLongText(titleText, target, source) : "";
+      setTranslations((prev) => ({ ...prev, [key]: { text: tText, title: tTitle, showing: true, loading: false } }));
+    } catch (e) {
+      setTranslations((prev) => ({ ...prev, [key]: { loading: false, showing: false, error: true } }));
+    }
   };
 
   const handleSave = async () => {
@@ -1691,6 +1746,9 @@ export default function Reflection() {
                   const author = profileCache[post.userId];
                   const m = MOODS.find((mm) => mm.key === post.mood) || MOODS[0];
                   const liked = post.likes.includes(account.userId);
+                  const trKey = `post-${post.id}`;
+                  const tr = translations[trKey];
+                  const showingTr = tr?.showing && tr?.text;
                   return (
                     <div key={post.id} className="rf-card" style={{ padding: 18 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
@@ -1707,9 +1765,15 @@ export default function Reflection() {
                         </div>
                         <span style={{ width: 9, height: 9, borderRadius: "50%", background: m.color, display: "inline-block" }} />
                       </div>
-                      {post.title && <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 16 }}>{post.title}</p>}
+                      {post.title && <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 16 }}>{showingTr && tr.title ? tr.title : post.title}</p>}
                       <MediaBlock url={post.mediaUrl} type={post.mediaType} alt={post.title} />
-                      <p style={{ margin: "0 0 12px", lineHeight: 1.6, fontSize: 15, whiteSpace: "pre-wrap" }}>{post.text}</p>
+                      <p style={{ margin: "0 0 8px", lineHeight: 1.6, fontSize: 15, whiteSpace: "pre-wrap" }}>{showingTr ? tr.text : post.text}</p>
+                      <button
+                        onClick={() => handleTranslate(trKey, post.title, post.text)}
+                        style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 12.5, cursor: "pointer", padding: 0, marginBottom: 10 }}
+                      >
+                        {tr?.loading ? t.translating : tr?.error ? t.translateError : showingTr ? t.showOriginal : t.translateBtn}
+                      </button>
                       <div style={{ display: "flex", gap: 6, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
                         <button className="rf-icon-btn" onClick={() => toggleLike(post)} style={{ color: liked ? "var(--clay-dark)" : "var(--ink-soft)" }}>
                           {liked ? "♥" : "♡"} {post.likes.length > 0 ? post.likes.length : t.like}
@@ -2019,15 +2083,24 @@ export default function Reflection() {
                   )}
                   {(isOwnProfile ? feed.filter((p) => p.userId === account.userId) : viewedPosts).map((post) => {
                     const m = MOODS.find((mm) => mm.key === post.mood) || MOODS[0];
+                    const trKey = `profpost-${post.id}`;
+                    const tr = translations[trKey];
+                    const showingTr = tr?.showing && tr?.text;
                     return (
                       <div key={post.id} className="rf-card" style={{ padding: 16 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                           <span style={{ width: 9, height: 9, borderRadius: "50%", background: m.color, display: "inline-block" }} />
                           <span className="rf-mono" style={{ fontSize: 11, color: "var(--ink-soft)" }}>{formatDate(post.ts, lang)}</span>
                         </div>
-                        {post.title && <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 15 }}>{post.title}</p>}
+                        {post.title && <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 15 }}>{showingTr && tr.title ? tr.title : post.title}</p>}
                         <MediaBlock url={post.mediaUrl} type={post.mediaType} alt={post.title} />
-                        <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.text}</p>
+                        <p style={{ margin: "0 0 6px", fontSize: 14.5, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{showingTr ? tr.text : post.text}</p>
+                        <button
+                          onClick={() => handleTranslate(trKey, post.title, post.text)}
+                          style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 12, cursor: "pointer", padding: 0 }}
+                        >
+                          {tr?.loading ? t.translating : tr?.error ? t.translateError : showingTr ? t.showOriginal : t.translateBtn}
+                        </button>
                       </div>
                     );
                   })}
