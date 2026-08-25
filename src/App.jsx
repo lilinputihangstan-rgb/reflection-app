@@ -50,6 +50,17 @@ const T = {
     privateNote: "Jika tidak dicentang, refleksi ini hanya untukmu sendiri.",
     save: "Simpan refleksi",
     saved: "Tersimpan.",
+    titleLabel: "Judul / topik (opsional)",
+    titlePlaceholder: "Refleksi ini tentang apa?",
+    mediaAttachLabel: "📎 Tambah foto/video (opsional)",
+    mediaRemove: "✕ Hapus",
+    mediaUnsupported: "Format file tidak didukung. Pakai foto atau video ya.",
+    mediaTooLarge: "Ukuran file maksimal 25MB.",
+    uploadingMedia: "Mengunggah media…",
+    calendarToggle: "📅 Lihat berdasarkan tanggal",
+    calendarClose: "Tutup kalender",
+    calendarShowAll: "Tampilkan semua",
+    calendarNoEntries: "Belum ada refleksi di tanggal ini.",
     empty_journal: "Belum ada refleksi. Tulisan pertamamu akan muncul di sini.",
     streak: "hari beruntun",
     totalEntries: "total refleksi",
@@ -162,6 +173,17 @@ const T = {
     privateNote: "If unchecked, this reflection stays private to you.",
     save: "Save reflection",
     saved: "Saved.",
+    titleLabel: "Title / topic (optional)",
+    titlePlaceholder: "What's this reflection about?",
+    mediaAttachLabel: "📎 Add photo/video (optional)",
+    mediaRemove: "✕ Remove",
+    mediaUnsupported: "Unsupported file type. Please use a photo or video.",
+    mediaTooLarge: "File size must be under 25MB.",
+    uploadingMedia: "Uploading media…",
+    calendarToggle: "📅 View by date",
+    calendarClose: "Close calendar",
+    calendarShowAll: "Show all",
+    calendarNoEntries: "No reflections on this date yet.",
     empty_journal: "No reflections yet. Your first entry will appear here.",
     streak: "day streak",
     totalEntries: "total entries",
@@ -466,6 +488,9 @@ function mapEntryRow(row) {
     ts: new Date(row.ts).getTime(),
     mood: row.mood,
     text: row.text,
+    title: row.title || "",
+    mediaUrl: row.media_url || null,
+    mediaType: row.media_type || null,
     promptId: row.prompt_id,
     isPublic: row.is_public,
   };
@@ -477,9 +502,86 @@ function mapPostRow(row, likes = [], comments = []) {
     ts: new Date(row.ts).getTime(),
     mood: row.mood,
     text: row.text,
+    title: row.title || "",
+    mediaUrl: row.media_url || null,
+    mediaType: row.media_type || null,
     likes,
     comments,
   };
+}
+function sameDay(ts, date) {
+  const d = new Date(ts);
+  return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate();
+}
+function MediaBlock({ url, type, alt = "" }) {
+  if (!url) return null;
+  return (
+    <div style={{ marginTop: 10, marginBottom: 10, borderRadius: 12, overflow: "hidden", border: "1px solid var(--line)" }}>
+      {type === "video" ? (
+        <video src={url} controls style={{ width: "100%", display: "block", maxHeight: 420, background: "#000" }} />
+      ) : (
+        <img src={url} alt={alt} style={{ width: "100%", display: "block", maxHeight: 420, objectFit: "cover" }} />
+      )}
+    </div>
+  );
+}
+function MiniCalendar({ entries, viewMonth, onChangeMonth, selectedDate, onSelectDate, lang }) {
+  const year = viewMonth.getFullYear();
+  const month = viewMonth.getMonth();
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const entryDays = useMemo(() => {
+    const s = new Set();
+    entries.forEach((e) => {
+      const d = new Date(e.ts);
+      if (d.getFullYear() === year && d.getMonth() === month) s.add(d.getDate());
+    });
+    return s;
+  }, [entries, year, month]);
+  const monthLabel = viewMonth.toLocaleDateString(lang === "id" ? "id-ID" : "en-US", { month: "long", year: "numeric" });
+  const weekdayLabels = lang === "id" ? ["M", "S", "S", "R", "K", "J", "S"] : ["S", "M", "T", "W", "T", "F", "S"];
+  const cells = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  const today = new Date();
+
+  return (
+    <div className="rf-card" style={{ padding: 14, marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <button onClick={() => onChangeMonth(new Date(year, month - 1, 1))} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "var(--ink-soft)", padding: "2px 8px" }}>‹</button>
+        <span style={{ fontWeight: 600, fontSize: 13, textTransform: "capitalize" }}>{monthLabel}</span>
+        <button onClick={() => onChangeMonth(new Date(year, month + 1, 1))} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "var(--ink-soft)", padding: "2px 8px" }}>›</button>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 4, fontSize: 11, color: "var(--ink-soft)", marginBottom: 4, textAlign: "center" }}>
+        {weekdayLabels.map((w, i) => <span key={i}>{w}</span>)}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 4 }}>
+        {cells.map((d, i) => {
+          if (d === null) return <span key={i} />;
+          const cellDate = new Date(year, month, d);
+          const isSelected = selectedDate && sameDay(selectedDate.getTime(), cellDate);
+          const hasEntry = entryDays.has(d);
+          const isToday = sameDay(today.getTime(), cellDate);
+          return (
+            <button
+              key={i}
+              onClick={() => onSelectDate(isSelected ? null : cellDate)}
+              style={{
+                position: "relative", padding: "6px 0", borderRadius: 8,
+                border: isToday && !isSelected ? "1px solid var(--clay)" : "1px solid transparent",
+                background: isSelected ? "var(--clay)" : "transparent",
+                color: isSelected ? "var(--paper)" : "var(--ink)",
+                fontSize: 12, cursor: "pointer",
+              }}
+            >
+              {d}
+              {hasEntry && !isSelected && <span style={{ position: "absolute", bottom: 2, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: "50%", background: "var(--clay)" }} />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function Avatar({ profile, size = 40 }) {
@@ -652,7 +754,16 @@ export default function Reflection() {
   const [entries, setEntries] = useState([]);
   const [mood, setMood] = useState("calm");
   const [text, setText] = useState("");
+  const [title, setTitle] = useState("");
+  const [mediaFile, setMediaFile] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null);
+  const [mediaType, setMediaType] = useState(null); // "image" | "video" | null
+  const [mediaError, setMediaError] = useState("");
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [publish, setPublish] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
+  const [selectedDate, setSelectedDate] = useState(null);
   const [promptIndex, setPromptIndex] = useState(0);
   const [saveState, setSaveState] = useState("idle");
   const [feed, setFeed] = useState([]);
@@ -898,16 +1009,62 @@ export default function Reflection() {
   }, [entries]);
   const maxMoodCount = Math.max(1, ...Object.values(moodCounts));
 
+  const handleMediaChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMediaError("");
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+    if (!isImage && !isVideo) {
+      setMediaError(t.mediaUnsupported);
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      setMediaError(t.mediaTooLarge);
+      e.target.value = "";
+      return;
+    }
+    if (mediaPreview) URL.revokeObjectURL(mediaPreview);
+    setMediaFile(file);
+    setMediaType(isImage ? "image" : "video");
+    setMediaPreview(URL.createObjectURL(file));
+  };
+
+  const clearMedia = () => {
+    if (mediaPreview) URL.revokeObjectURL(mediaPreview);
+    setMediaFile(null);
+    setMediaPreview(null);
+    setMediaType(null);
+    setMediaError("");
+  };
+
   const handleSave = async () => {
     if (!text.trim() || !account) return;
     setSaveState("saving");
     try {
+      let mediaUrl = null;
+      let mType = null;
+      if (mediaFile) {
+        setUploadingMedia(true);
+        const safeName = mediaFile.name.replace(/[^a-zA-Z0-9_.-]/g, "_");
+        const path = `${account.userId}/${uid()}-${safeName}`;
+        const { error: upErr } = await supabase.storage.from("reflection-media").upload(path, mediaFile);
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("reflection-media").getPublicUrl(path);
+        mediaUrl = pub?.publicUrl || null;
+        mType = mediaType;
+        setUploadingMedia(false);
+      }
       const { data: inserted, error } = await supabase
         .from("journal_entries")
         .insert({
           user_id: account.userId,
           mood,
           text: text.trim(),
+          title: title.trim() || null,
+          media_url: mediaUrl,
+          media_type: mType,
           prompt_id: currentPrompt.id,
           is_public: publish,
         })
@@ -917,11 +1074,15 @@ export default function Reflection() {
       const entry = mapEntryRow(inserted);
       setEntries((prev) => [entry, ...prev]);
       if (publish) {
-        await supabase.from("posts").insert({ user_id: account.userId, mood, text: entry.text });
+        await supabase.from("posts").insert({
+          user_id: account.userId, mood, text: entry.text,
+          title: title.trim() || null, media_url: mediaUrl, media_type: mType,
+        });
       }
-      setText(""); setPublish(false); setSaveState("saved");
+      setText(""); setTitle(""); clearMedia(); setPublish(false); setSaveState("saved");
       setTimeout(() => setSaveState("idle"), 2500);
     } catch (e) {
+      setUploadingMedia(false);
       setSaveState("idle");
     }
   };
@@ -1541,11 +1702,13 @@ export default function Reflection() {
                             <p style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>{author?.displayName || "…"}</p>
                           </button>
                           <p className="rf-mono" style={{ margin: 0, fontSize: 11, color: "var(--ink-soft)" }}>
-                            {author?.status ? `${author.status} · ` : ""}{timeAgo(post.ts, lang)} · {t.moods[post.mood]}
+                            {author?.status ? `${author.status} · ` : ""}{formatDate(post.ts, lang)} · {t.moods[post.mood]}
                           </p>
                         </div>
                         <span style={{ width: 9, height: 9, borderRadius: "50%", background: m.color, display: "inline-block" }} />
                       </div>
+                      {post.title && <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 16 }}>{post.title}</p>}
+                      <MediaBlock url={post.mediaUrl} type={post.mediaType} alt={post.title} />
                       <p style={{ margin: "0 0 12px", lineHeight: 1.6, fontSize: 15, whiteSpace: "pre-wrap" }}>{post.text}</p>
                       <div style={{ display: "flex", gap: 6, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
                         <button className="rf-icon-btn" onClick={() => toggleLike(post)} style={{ color: liked ? "var(--clay-dark)" : "var(--ink-soft)" }}>
@@ -1692,6 +1855,31 @@ export default function Reflection() {
               <textarea className="rf-textarea" placeholder={t.writePlaceholder} value={text} onChange={(e) => setText(e.target.value)} />
             </div>
 
+            <div style={{ marginTop: 12 }}>
+              <input
+                className="rf-input"
+                style={{ width: "100%", boxSizing: "border-box" }}
+                placeholder={t.titlePlaceholder}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              {!mediaPreview ? (
+                <label className="rf-btn" style={{ display: "inline-flex", background: "transparent", border: "1px dashed var(--line)", color: "var(--ink-soft)", padding: "9px 16px", fontSize: 13, cursor: "pointer" }}>
+                  {t.mediaAttachLabel}
+                  <input type="file" accept="image/*,video/*" onChange={handleMediaChange} style={{ display: "none" }} />
+                </label>
+              ) : (
+                <div style={{ position: "relative", maxWidth: 280 }}>
+                  <MediaBlock url={mediaPreview} type={mediaType} />
+                  <button onClick={clearMedia} className="rf-btn" style={{ background: "var(--paper-card)", border: "1px solid var(--line)", color: "var(--ink-soft)", padding: "5px 12px", fontSize: 12 }}>{t.mediaRemove}</button>
+                </div>
+              )}
+              {mediaError && <p style={{ color: "#B5654A", fontSize: 12, marginTop: 6 }}>{mediaError}</p>}
+            </div>
+
             <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 12, fontSize: 14, color: "var(--ink-soft)", cursor: "pointer" }}>
               <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} style={{ marginTop: 3 }} />
               <span>{t.publishToggle}<br /><span style={{ fontSize: 12 }}>{t.privateNote}</span></span>
@@ -1699,35 +1887,65 @@ export default function Reflection() {
 
             <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 14 }}>
               <button className="rf-btn" onClick={handleSave} disabled={!text.trim() || saveState === "saving"} style={{ background: "var(--clay)", color: "var(--paper)", padding: "12px 26px", fontSize: 15 }}>{t.save}</button>
+              {uploadingMedia && <span style={{ fontSize: 13, color: "var(--ink-soft)" }}>{t.uploadingMedia}</span>}
               {saveState === "saved" && <span style={{ fontSize: 13, color: "var(--moss)" }}>{t.saved}</span>}
             </div>
 
-            <div style={{ marginTop: 34 }}>
-              {entries.length === 0 ? (
-                <p style={{ color: "var(--ink-soft)" }}>{t.empty_journal}</p>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  {entries.map((e) => {
-                    const m = MOODS.find((mm) => mm.key === e.mood) || MOODS[0];
-                    const expanded = expandedEntry === e.id;
-                    const isLong = e.text.length > 220;
-                    return (
-                      <div key={e.id} className="rf-card" style={{ padding: 18 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ width: 10, height: 10, borderRadius: "50%", background: m.color, display: "inline-block" }} />
-                            <span className="rf-mono" style={{ fontSize: 12, color: "var(--ink-soft)" }}>{formatDate(e.ts, lang)} · {t.moods[e.mood]}</span>
-                            {e.isPublic && <span style={{ fontSize: 10, background: "var(--gold)", color: "var(--paper-card)", padding: "2px 8px", borderRadius: 999 }}>{t.publicBadge}</span>}
-                          </div>
-                          <button onClick={() => handleDelete(e.id)} style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 12, cursor: "pointer" }}>{t.deleteEntry}</button>
-                        </div>
-                        <p style={{ margin: 0, lineHeight: 1.6, fontSize: 15, whiteSpace: "pre-wrap" }}>{isLong && !expanded ? e.text.slice(0, 220) + "…" : e.text}</p>
-                        {isLong && <button onClick={() => setExpandedEntry(expanded ? null : e.id)} style={{ background: "none", border: "none", color: "var(--clay-dark)", fontSize: 13, marginTop: 6, cursor: "pointer", padding: 0 }}>{expanded ? t.readLess : t.readMore}</button>}
-                      </div>
-                    );
-                  })}
+            <div style={{ marginTop: 30 }}>
+              <button onClick={() => setCalendarOpen((v) => !v)} className="rf-btn" style={{ background: "transparent", border: "1px solid var(--line)", color: "var(--ink-soft)", padding: "7px 14px", fontSize: 13 }}>
+                {calendarOpen ? t.calendarClose : t.calendarToggle}
+              </button>
+              {calendarOpen && (
+                <div style={{ marginTop: 12 }}>
+                  <MiniCalendar
+                    entries={entries}
+                    viewMonth={calendarMonth}
+                    onChangeMonth={setCalendarMonth}
+                    selectedDate={selectedDate}
+                    onSelectDate={setSelectedDate}
+                    lang={lang}
+                  />
+                  {selectedDate && (
+                    <button onClick={() => setSelectedDate(null)} className="rf-btn" style={{ background: "transparent", border: "none", color: "var(--clay-dark)", fontSize: 13, padding: 0, marginBottom: 10, textDecoration: "underline" }}>
+                      {t.calendarShowAll}
+                    </button>
+                  )}
                 </div>
               )}
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              {(() => {
+                const visibleEntries = selectedDate ? entries.filter((e) => sameDay(e.ts, selectedDate)) : entries;
+                if (visibleEntries.length === 0) {
+                  return <p style={{ color: "var(--ink-soft)" }}>{selectedDate ? t.calendarNoEntries : t.empty_journal}</p>;
+                }
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                    {visibleEntries.map((e) => {
+                      const m = MOODS.find((mm) => mm.key === e.mood) || MOODS[0];
+                      const expanded = expandedEntry === e.id;
+                      const isLong = e.text.length > 220;
+                      return (
+                        <div key={e.id} className="rf-card" style={{ padding: 18 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <span style={{ width: 10, height: 10, borderRadius: "50%", background: m.color, display: "inline-block" }} />
+                              <span className="rf-mono" style={{ fontSize: 12, color: "var(--ink-soft)" }}>{formatDate(e.ts, lang)} · {t.moods[e.mood]}</span>
+                              {e.isPublic && <span style={{ fontSize: 10, background: "var(--gold)", color: "var(--paper-card)", padding: "2px 8px", borderRadius: 999 }}>{t.publicBadge}</span>}
+                            </div>
+                            <button onClick={() => handleDelete(e.id)} style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 12, cursor: "pointer" }}>{t.deleteEntry}</button>
+                          </div>
+                          {e.title && <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 15.5 }}>{e.title}</p>}
+                          <MediaBlock url={e.mediaUrl} type={e.mediaType} alt={e.title} />
+                          <p style={{ margin: 0, lineHeight: 1.6, fontSize: 15, whiteSpace: "pre-wrap" }}>{isLong && !expanded ? e.text.slice(0, 220) + "…" : e.text}</p>
+                          {isLong && <button onClick={() => setExpandedEntry(expanded ? null : e.id)} style={{ background: "none", border: "none", color: "var(--clay-dark)", fontSize: 13, marginTop: 6, cursor: "pointer", padding: 0 }}>{expanded ? t.readLess : t.readMore}</button>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           </section>
         )}
@@ -1805,8 +2023,10 @@ export default function Reflection() {
                       <div key={post.id} className="rf-card" style={{ padding: 16 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                           <span style={{ width: 9, height: 9, borderRadius: "50%", background: m.color, display: "inline-block" }} />
-                          <span className="rf-mono" style={{ fontSize: 11, color: "var(--ink-soft)" }}>{timeAgo(post.ts, lang)}</span>
+                          <span className="rf-mono" style={{ fontSize: 11, color: "var(--ink-soft)" }}>{formatDate(post.ts, lang)}</span>
                         </div>
+                        {post.title && <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 15 }}>{post.title}</p>}
+                        <MediaBlock url={post.mediaUrl} type={post.mediaType} alt={post.title} />
                         <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.text}</p>
                       </div>
                     );
