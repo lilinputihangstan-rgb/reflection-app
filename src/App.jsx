@@ -15,7 +15,7 @@ const T = {
   id: {
     appName: "Reflection",
     tagline: "Ruang untuk merenung — simpan untuk dirimu, atau bagikan pada dunia.",
-    nav: { feed: "Beranda", journal: "Jurnal Saya", profile: "Profil" },
+    nav: { feed: "Beranda", search: "Cari", journal: "Jurnal Saya", profile: "Profil" },
     onboardTitle: "Buat profil refleksimu",
     onboardDesc: "Ini akan menjadi identitasmu di Reflection. Kamu tetap bisa menulis secara privat kapan pun.",
     username: "Username", usernamePh: "mis. lilin_senja",
@@ -65,6 +65,10 @@ const T = {
     showOriginal: "Tampilkan teks asli",
     translating: "Menerjemahkan…",
     translateError: "Gagal menerjemahkan, coba lagi.",
+    searchPlaceholder: "Cari nama pengguna atau nama tampilan…",
+    searchEmpty: "Ketik nama buat mulai mencari.",
+    searchNoResults: "Nggak ketemu akun dengan nama itu.",
+    searchLoading: "Mencari…",
     empty_journal: "Belum ada refleksi. Tulisan pertamamu akan muncul di sini.",
     streak: "hari beruntun",
     totalEntries: "total refleksi",
@@ -142,7 +146,7 @@ const T = {
   en: {
     appName: "Reflection",
     tagline: "A space to reflect — keep it private, or share it with the world.",
-    nav: { feed: "Feed", journal: "My Journal", profile: "Profile" },
+    nav: { feed: "Feed", search: "Search", journal: "My Journal", profile: "Profile" },
     onboardTitle: "Create your Reflection profile",
     onboardDesc: "This becomes your identity on Reflection. You can still write privately anytime.",
     username: "Username", usernamePh: "e.g. dusk_candle",
@@ -192,6 +196,10 @@ const T = {
     showOriginal: "Show original text",
     translating: "Translating…",
     translateError: "Translation failed, try again.",
+    searchPlaceholder: "Search username or display name…",
+    searchEmpty: "Type a name to start searching.",
+    searchNoResults: "No accounts found with that name.",
+    searchLoading: "Searching…",
     empty_journal: "No reflections yet. Your first entry will appear here.",
     streak: "day streak",
     totalEntries: "total entries",
@@ -801,6 +809,9 @@ export default function Reflection() {
   const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
   const [selectedDate, setSelectedDate] = useState(null);
   const [translations, setTranslations] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [promptIndex, setPromptIndex] = useState(0);
   const [saveState, setSaveState] = useState("idle");
   const [feed, setFeed] = useState([]);
@@ -1035,6 +1046,28 @@ export default function Reflection() {
   useEffect(() => {
     if (tab === "feed" && account) loadFeed();
   }, [tab, account, loadFeed]);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) { setSearchResults([]); setSearchLoading(false); return; }
+    setSearchLoading(true);
+    const handle = setTimeout(async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+          .limit(20);
+        if (error) throw error;
+        setSearchResults((data || []).map(mapProfileRow));
+      } catch (e) {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 350);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
 
   const currentPrompt = PROMPTS[promptIndex];
   const streak = useMemo(() => computeStreak(entries), [entries]);
@@ -1734,6 +1767,43 @@ export default function Reflection() {
       </header>
 
       <main style={{ maxWidth: 640, margin: "0 auto", padding: "20px 20px 80px" }}>
+        {tab === "search" && (
+          <section>
+            <input
+              className="rf-input"
+              style={{ width: "100%", boxSizing: "border-box", padding: "12px 16px", fontSize: 15, marginBottom: 18 }}
+              placeholder={t.searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+            />
+            {!searchQuery.trim() ? (
+              <p style={{ color: "var(--ink-soft)" }}>{t.searchEmpty}</p>
+            ) : searchLoading ? (
+              <p style={{ color: "var(--ink-soft)" }}>{t.searchLoading}</p>
+            ) : searchResults.length === 0 ? (
+              <p style={{ color: "var(--ink-soft)" }}>{t.searchNoResults}</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {searchResults.map((p) => (
+                  <button
+                    key={p.userId}
+                    onClick={() => openProfile(p.userId)}
+                    className="rf-card"
+                    style={{ padding: 14, display: "flex", alignItems: "center", gap: 12, textAlign: "left", cursor: "pointer", border: "1px solid var(--line)", background: "var(--paper-card)" }}
+                  >
+                    <Avatar profile={p} size={44} />
+                    <div style={{ flex: 1 }}>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: 15 }}>{p.displayName}</p>
+                      <p className="rf-mono" style={{ margin: "2px 0 0", fontSize: 12, color: "var(--ink-soft)" }}>@{p.username}</p>
+                      {p.status && <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--clay-dark)" }}>{p.status}</p>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
         {tab === "feed" && (
           <section>
             {feedLoading ? (
