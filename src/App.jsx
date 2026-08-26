@@ -40,6 +40,19 @@ const T = {
     authErrNotConfirmed: "Email belum dikonfirmasi. Cek inbox kamu dulu.",
     authErrRateLimit: "Terlalu banyak percobaan. Coba lagi sebentar lagi.",
     authErrGeneric: "Ada masalah, coba lagi.",
+    authForgotLink: "Lupa password?",
+    authBackToLogin: "Kembali ke Masuk",
+    authSendResetBtn: "Kirim link reset", authSendResetBtnLoading: "Mengirim…",
+    authEmailRequired: "Isi email kamu dulu ya.",
+    authResetSent: "Link reset password sudah dikirim. Cek email kamu (termasuk folder spam).",
+    resetTitle: "Atur Password Baru",
+    resetSubtitle: "Masukkan password baru buat akun kamu.",
+    resetNewPasswordPh: "Password baru (minimal 6 karakter)",
+    resetConfirmPasswordPh: "Ulangi password baru",
+    resetSubmitBtn: "Simpan password baru", resetSubmitBtnLoading: "Menyimpan…",
+    resetMismatch: "Password tidak sama, coba periksa lagi.",
+    resetSuccess: "Password berhasil diganti! Kamu sudah masuk.",
+    resetContinueBtn: "Lanjut ke Reflection",
     greetingPrefix: "Selamat",
     morning: "pagi", afternoon: "siang", evening: "sore", night: "malam",
     promptLabel: "Renungan hari ini",
@@ -69,6 +82,22 @@ const T = {
     searchEmpty: "Ketik nama buat mulai mencari.",
     searchNoResults: "Nggak ketemu akun dengan nama itu.",
     searchLoading: "Mencari…",
+    reportAction: "🚩 Laporkan",
+    blockAction: "🚫 Blokir pengguna",
+    unblockAction: "Buka blokir",
+    reportTitle: "Laporkan Post",
+    reportSubtitle: "Kasih tau kami kenapa post ini bermasalah (opsional).",
+    reportPlaceholder: "Ceritakan alasannya di sini…",
+    reportSubmitBtn: "Kirim Laporan", reportSubmitBtnLoading: "Mengirim…",
+    reportCancel: "Batal",
+    reportSentTitle: "Laporan terkirim",
+    reportSentBody: "Makasih udah kasih tau kami. Kami akan meninjau laporan ini.",
+    reportClose: "Tutup",
+    blockConfirmTitle: "Blokir pengguna ini?",
+    blockConfirmBody: "Kamu nggak akan lihat post mereka lagi, dan mereka nggak akan muncul di pencarian kamu.",
+    blockConfirmBtn: "Ya, Blokir",
+    blockedListEmpty: "Kamu belum memblokir siapa pun.",
+    blockedListTitle: "Pengguna yang Diblokir",
     empty_journal: "Belum ada refleksi. Tulisan pertamamu akan muncul di sini.",
     streak: "hari beruntun",
     totalEntries: "total refleksi",
@@ -142,6 +171,42 @@ const T = {
     fontElegant: "Elegan",
     fontHandwritten: "Tulisan Tangan",
     fontModern: "Modern",
+    legalPrivacyLink: "Kebijakan Privasi",
+    legalTermsLink: "Ketentuan Layanan",
+    legalPrivacyTitle: "Kebijakan Privasi",
+    legalTermsTitle: "Ketentuan Layanan",
+    legalPrivacyBody: [
+      "Terakhir diperbarui: Agustus 2026",
+      "Reflection adalah aplikasi jurnal & refleksi pribadi yang dibuat secara independen. Halaman ini menjelaskan data apa yang kami simpan dan bagaimana data itu dipakai.",
+      "## Data yang kami simpan",
+      "Saat kamu mendaftar: email, nama pengguna, nama tampilan, dan foto profil (kalau pakai Google) atau data yang kamu isi sendiri saat pendaftaran.\nSaat kamu menulis refleksi: teks refleksi, mood, judul/topik (kalau diisi), dan foto/video yang kamu lampirkan.\nAktivitas sosial: like, komentar, siapa yang kamu follow, kalau kamu memilih mempublikasikan refleksi ke Beranda.",
+      "## Bagaimana data dipakai",
+      "Data dipakai semata-mata untuk menjalankan fitur aplikasi: menampilkan jurnalmu, menampilkan post di Beranda kalau kamu pilih publik, dan menghubungkan kamu dengan pengguna lain lewat fitur cari/follow. Kami tidak menjual data kamu ke pihak ketiga, dan tidak menampilkan iklan.",
+      "## Refleksi privat vs publik",
+      "Refleksi yang TIDAK dicentang \"Publikasikan ke Beranda\" hanya bisa dilihat oleh kamu sendiri. Refleksi yang dipublikasikan bisa dilihat pengguna lain yang punya akun di aplikasi ini.",
+      "## Kontrol kamu",
+      "Kamu bisa menghapus refleksi kapan saja (baik privat maupun yang sudah dipublikasikan — keduanya akan terhapus bersamaan). Kamu bisa memblokir atau melaporkan pengguna lain lewat fitur yang tersedia di profil/post mereka.",
+      "## Penyimpanan & keamanan",
+      "Data disimpan menggunakan layanan Supabase (database & storage terenkripsi). Password kamu tidak pernah disimpan dalam bentuk teks biasa — sistem otentikasi menanganinya secara aman.",
+      "## Kontak",
+      "Ada pertanyaan soal privasi datamu? Hubungi pembuat aplikasi ini melalui GitHub: lilinputihangstan-rgb.",
+    ],
+    legalTermsBody: [
+      "Terakhir diperbarui: Agustus 2026",
+      "Dengan menggunakan Reflection, kamu setuju dengan ketentuan berikut.",
+      "## Penggunaan yang wajar",
+      "Reflection dibuat sebagai ruang refleksi pribadi dan berbagi yang sehat. Kamu setuju untuk tidak memposting konten yang mengandung kebencian, pelecehan, ancaman, konten dewasa/eksplisit, atau hal yang melanggar hukum.",
+      "## Konten kamu",
+      "Kamu tetap pemilik penuh atas tulisan, foto, dan video yang kamu unggah. Dengan mempublikasikan ke Beranda, kamu mengizinkan pengguna lain di aplikasi ini untuk melihat konten tersebut.",
+      "## Moderasi",
+      "Kami berhak menghapus konten atau menonaktifkan akun yang melanggar ketentuan ini, termasuk berdasarkan laporan dari pengguna lain.",
+      "## Batasan usia",
+      "Aplikasi ini ditujukan untuk pengguna berusia 13 tahun ke atas.",
+      "## Tanpa jaminan",
+      "Aplikasi ini disediakan \"apa adanya\", dikembangkan dan dikelola secara independen tanpa jaminan ketersediaan layanan 100% sepanjang waktu.",
+      "## Perubahan ketentuan",
+      "Ketentuan ini bisa berubah sewaktu-waktu seiring berkembangnya aplikasi. Perubahan besar akan diinformasikan di dalam aplikasi.",
+    ],
   },
   en: {
     appName: "Reflection",
@@ -171,6 +236,19 @@ const T = {
     authErrNotConfirmed: "Email not confirmed yet. Check your inbox first.",
     authErrRateLimit: "Too many attempts. Please try again shortly.",
     authErrGeneric: "Something went wrong, please try again.",
+    authForgotLink: "Forgot password?",
+    authBackToLogin: "Back to Sign in",
+    authSendResetBtn: "Send reset link", authSendResetBtnLoading: "Sending…",
+    authEmailRequired: "Please enter your email first.",
+    authResetSent: "Password reset link sent. Check your email (including spam folder).",
+    resetTitle: "Set New Password",
+    resetSubtitle: "Enter a new password for your account.",
+    resetNewPasswordPh: "New password (at least 6 characters)",
+    resetConfirmPasswordPh: "Confirm new password",
+    resetSubmitBtn: "Save new password", resetSubmitBtnLoading: "Saving…",
+    resetMismatch: "Passwords don't match, please check again.",
+    resetSuccess: "Password changed successfully! You're now signed in.",
+    resetContinueBtn: "Continue to Reflection",
     greetingPrefix: "Good",
     morning: "morning", afternoon: "afternoon", evening: "evening", night: "evening",
     promptLabel: "Today's reflection",
@@ -200,6 +278,22 @@ const T = {
     searchEmpty: "Type a name to start searching.",
     searchNoResults: "No accounts found with that name.",
     searchLoading: "Searching…",
+    reportAction: "🚩 Report",
+    blockAction: "🚫 Block user",
+    unblockAction: "Unblock",
+    reportTitle: "Report Post",
+    reportSubtitle: "Tell us why this post is a problem (optional).",
+    reportPlaceholder: "Describe the reason here…",
+    reportSubmitBtn: "Send Report", reportSubmitBtnLoading: "Sending…",
+    reportCancel: "Cancel",
+    reportSentTitle: "Report sent",
+    reportSentBody: "Thanks for letting us know. We'll review this report.",
+    reportClose: "Close",
+    blockConfirmTitle: "Block this user?",
+    blockConfirmBody: "You won't see their posts anymore, and they won't appear in your search.",
+    blockConfirmBtn: "Yes, Block",
+    blockedListEmpty: "You haven't blocked anyone yet.",
+    blockedListTitle: "Blocked Users",
     empty_journal: "No reflections yet. Your first entry will appear here.",
     streak: "day streak",
     totalEntries: "total entries",
@@ -273,6 +367,42 @@ const T = {
     fontElegant: "Elegant",
     fontHandwritten: "Handwritten",
     fontModern: "Modern",
+    legalPrivacyLink: "Privacy Policy",
+    legalTermsLink: "Terms of Service",
+    legalPrivacyTitle: "Privacy Policy",
+    legalTermsTitle: "Terms of Service",
+    legalPrivacyBody: [
+      "Last updated: August 2026",
+      "Reflection is an independently-built personal journaling & reflection app. This page explains what data we store and how it's used.",
+      "## Data we store",
+      "When you sign up: email, username, display name, and profile photo (if using Google) or the data you fill in yourself during signup.\nWhen you write a reflection: reflection text, mood, title/topic (if filled in), and any photo/video you attach.\nSocial activity: likes, comments, who you follow, if you choose to publish a reflection to the Feed.",
+      "## How data is used",
+      "Data is used solely to run the app's features: showing your journal, showing posts on the Feed if you choose to make them public, and connecting you with other users via search/follow. We do not sell your data to third parties, and we do not show ads.",
+      "## Private vs public reflections",
+      "Reflections that are NOT checked with \"Publish to Feed\" can only be seen by you. Published reflections can be seen by other users with an account on this app.",
+      "## Your controls",
+      "You can delete a reflection at any time (both private and published ones — both are removed together). You can block or report other users through the feature available on their profile/posts.",
+      "## Storage & security",
+      "Data is stored using Supabase services (encrypted database & storage). Your password is never stored as plain text — the authentication system handles it securely.",
+      "## Contact",
+      "Questions about your data privacy? Contact the app's developer via GitHub: lilinputihangstan-rgb.",
+    ],
+    legalTermsBody: [
+      "Last updated: August 2026",
+      "By using Reflection, you agree to the following terms.",
+      "## Fair use",
+      "Reflection is built as a space for personal, healthy reflection and sharing. You agree not to post content containing hate speech, harassment, threats, explicit/adult content, or anything unlawful.",
+      "## Your content",
+      "You retain full ownership of the writing, photos, and videos you upload. By publishing to the Feed, you allow other users of this app to view that content.",
+      "## Moderation",
+      "We reserve the right to remove content or disable accounts that violate these terms, including based on reports from other users.",
+      "## Age restriction",
+      "This app is intended for users aged 13 and above.",
+      "## No warranty",
+      "This app is provided \"as is\", built and maintained independently without a guarantee of 100% uptime.",
+      "## Changes to these terms",
+      "These terms may change over time as the app evolves. Major changes will be communicated within the app.",
+    ],
   },
 };
 
@@ -629,6 +759,69 @@ function MiniCalendar({ entries, viewMonth, onChangeMonth, selectedDate, onSelec
   );
 }
 
+function LegalModal({ page, onClose, t, lang }) {
+  if (!page) return null;
+  const content = page === "privacy" ? t.legalPrivacyBody : t.legalTermsBody;
+  const title = page === "privacy" ? t.legalPrivacyTitle : t.legalTermsTitle;
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: "fixed", inset: 0, background: "rgba(10,14,23,0.72)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="rf-card"
+        style={{ maxWidth: 560, width: "100%", maxHeight: "80vh", overflowY: "auto", padding: 26, position: "relative" }}
+      >
+        <button onClick={onClose} style={{ position: "absolute", top: 14, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--ink-soft)" }}>✕</button>
+        <h2 className="rf-display" style={{ fontSize: 22, marginTop: 0, marginBottom: 14, color: "var(--clay-dark)" }}>{title}</h2>
+        {content.map((para, i) => (
+          para.startsWith("## ") ? (
+            <h3 key={i} style={{ fontSize: 15, fontWeight: 700, marginTop: 18, marginBottom: 6 }}>{para.slice(3)}</h3>
+          ) : (
+            <p key={i} style={{ fontSize: 14, lineHeight: 1.7, color: "var(--ink)", marginBottom: 10, whiteSpace: "pre-wrap" }}>{para}</p>
+          )
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReportModal({ open, onClose, reason, setReason, onSubmit, sending, done, t }) {
+  if (!open) return null;
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(10,14,23,0.72)", zIndex: 210, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div onClick={(e) => e.stopPropagation()} className="rf-card" style={{ maxWidth: 420, width: "100%", padding: 24 }}>
+        {!done ? (
+          <>
+            <h3 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 700 }}>{t.reportTitle}</h3>
+            <p style={{ margin: "0 0 14px", fontSize: 13.5, color: "var(--ink-soft)" }}>{t.reportSubtitle}</p>
+            <textarea
+              className="rf-textarea"
+              style={{ minHeight: 90 }}
+              placeholder={t.reportPlaceholder}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+            <div style={{ display: "flex", gap: 10, marginTop: 14, justifyContent: "flex-end" }}>
+              <button onClick={onClose} className="rf-btn" style={{ background: "transparent", border: "1px solid var(--line)", color: "var(--ink-soft)", padding: "9px 16px", fontSize: 13.5 }}>{t.reportCancel}</button>
+              <button onClick={onSubmit} disabled={sending} className="rf-btn" style={{ background: "var(--clay)", color: "var(--paper)", padding: "9px 18px", fontSize: 13.5, opacity: sending ? 0.7 : 1 }}>
+                {sending ? t.reportSubmitBtnLoading : t.reportSubmitBtn}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h3 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 700 }}>{t.reportSentTitle}</h3>
+            <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--ink-soft)" }}>{t.reportSentBody}</p>
+            <button onClick={onClose} className="rf-btn" style={{ background: "var(--clay)", color: "var(--paper)", padding: "9px 18px", fontSize: 13.5 }}>{t.reportClose}</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Avatar({ profile, size = 40 }) {
   if (!profile) return <span style={{ width: size, height: size, borderRadius: "50%", background: "var(--line)", display: "inline-block" }} />;
   return (
@@ -789,12 +982,18 @@ export default function Reflection() {
   const [ready, setReady] = useState(false);
   const [session, setSession] = useState(null);
   const account = useMemo(() => (session ? { userId: session.user.id } : null), [session]); // derived, keeps rest of the app unchanged
-  const [authMode, setAuthMode] = useState("login"); // "login" | "signup"
+  const [authMode, setAuthMode] = useState("login"); // "login" | "signup" | "forgot"
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState("");
   const [authNotice, setAuthNotice] = useState("");
+  const [passwordRecovery, setPasswordRecovery] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [newPassword2, setNewPassword2] = useState("");
+  const [resetSaving, setResetSaving] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetDone, setResetDone] = useState(false);
   const [myProfile, setMyProfile] = useState(null);
   const [entries, setEntries] = useState([]);
   const [mood, setMood] = useState("calm");
@@ -810,12 +1009,19 @@ export default function Reflection() {
   const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
   const [selectedDate, setSelectedDate] = useState(null);
   const [translations, setTranslations] = useState({});
+  const [legalPage, setLegalPage] = useState(null); // "privacy" | "terms" | null
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [promptIndex, setPromptIndex] = useState(0);
   const [saveState, setSaveState] = useState("idle");
   const [feed, setFeed] = useState([]);
+  const [blockedIds, setBlockedIds] = useState([]);
+  const [reportModal, setReportModal] = useState(null); // { postId, userId } | null
+  const [reportReason, setReportReason] = useState("");
+  const [reportSending, setReportSending] = useState(false);
+  const [reportDone, setReportDone] = useState(false);
+  const [openMenuPostId, setOpenMenuPostId] = useState(null);
   const [feedLoading, setFeedLoading] = useState(false);
   const [profileCache, setProfileCache] = useState({});
   const [expandedEntry, setExpandedEntry] = useState(null);
@@ -897,6 +1103,8 @@ export default function Reflection() {
       if (mounted) setEntries((entryRows || []).map(mapEntryRow));
       const { data: followRows } = await supabase.from("follows").select("following_id").eq("follower_id", userId);
       if (mounted) setFollowingList((followRows || []).map((r) => r.following_id));
+      const { data: blockRows } = await supabase.from("blocks").select("blocked_id").eq("blocker_id", userId);
+      if (mounted) setBlockedIds((blockRows || []).map((r) => r.blocked_id));
     };
 
     supabase.auth.getSession().then(async ({ data: { session: s } }) => {
@@ -905,7 +1113,8 @@ export default function Reflection() {
       if (mounted) setReady(true);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, s) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, s) => {
+      if (event === "PASSWORD_RECOVERY") setPasswordRecovery(true);
       setSession(s);
       if (s) {
         await loadUserData(s.user.id);
@@ -969,6 +1178,52 @@ export default function Reflection() {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthNotice("");
+    if (!authEmail.trim()) {
+      setAuthError(t.authEmailRequired);
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(authEmail.trim(), {
+        redirectTo: window.location.origin,
+      });
+      if (error) throw error;
+      setAuthNotice(t.authResetSent);
+    } catch (err) {
+      setAuthError(mapAuthError(err?.message, t));
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setResetError("");
+    if (newPassword.length < 6) {
+      setResetError(t.authPasswordTooShort);
+      return;
+    }
+    if (newPassword !== newPassword2) {
+      setResetError(t.resetMismatch);
+      return;
+    }
+    setResetSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setResetDone(true);
+      setNewPassword(""); setNewPassword2("");
+    } catch (err) {
+      setResetError(mapAuthError(err?.message, t));
+    } finally {
+      setResetSaving(false);
+    }
+  };
+
   const createAccount = async (profileData) => {
     if (!session) return "Sesi tidak ditemukan, coba masuk ulang.";
     const row = {
@@ -1029,7 +1284,7 @@ export default function Reflection() {
         });
       }
       const posts = rows.map((r) => mapPostRow(r, likesByPost[r.id] || [], commentsByPost[r.id] || []));
-      setFeed(posts);
+      setFeed(posts.filter((p) => !blockedIds.includes(p.userId)));
       const uniqueAuthors = [...new Set(posts.map((p) => p.userId))];
       if (uniqueAuthors.length) {
         const { data: authorRows } = await supabase.from("profiles").select("*").in("id", uniqueAuthors);
@@ -1042,7 +1297,7 @@ export default function Reflection() {
     } finally {
       setFeedLoading(false);
     }
-  }, []);
+  }, [blockedIds]);
 
   useEffect(() => {
     if (tab === "feed" && account) loadFeed();
@@ -1060,7 +1315,7 @@ export default function Reflection() {
           .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
           .limit(20);
         if (error) throw error;
-        setSearchResults((data || []).map(mapProfileRow));
+        setSearchResults((data || []).map(mapProfileRow).filter((p) => !blockedIds.includes(p.userId)));
       } catch (e) {
         setSearchResults([]);
       } finally {
@@ -1068,7 +1323,7 @@ export default function Reflection() {
       }
     }, 350);
     return () => clearTimeout(handle);
-  }, [searchQuery]);
+  }, [searchQuery, blockedIds]);
 
   const currentPrompt = PROMPTS[promptIndex];
   const streak = useMemo(() => computeStreak(entries), [entries]);
@@ -1251,6 +1506,50 @@ export default function Reflection() {
       } else {
         await supabase.from("follows").insert({ follower_id: account.userId, following_id: userId });
       }
+    } catch (e) {}
+  };
+
+  const submitReport = async () => {
+    if (!reportModal || !account) return;
+    setReportSending(true);
+    try {
+      await supabase.from("reports").insert({
+        reporter_id: account.userId,
+        reported_user_id: reportModal.userId,
+        post_id: reportModal.postId || null,
+        reason: reportReason.trim() || null,
+      });
+      setReportDone(true);
+    } catch (e) {
+      // fail quietly, keep modal open with basic message via reportDone remaining false
+    } finally {
+      setReportSending(false);
+    }
+  };
+
+  const closeReportModal = () => {
+    setReportModal(null);
+    setReportReason("");
+    setReportDone(false);
+    setReportSending(false);
+  };
+
+  const handleBlock = async (userId) => {
+    if (!account || userId === account.userId) return;
+    setBlockedIds((prev) => [...new Set([...prev, userId])]);
+    setFeed((prev) => prev.filter((p) => p.userId !== userId));
+    setSearchResults((prev) => prev.filter((p) => p.userId !== userId));
+    setOpenMenuPostId(null);
+    if (viewingUserId === userId) { setTab("feed"); setViewingUserId(null); }
+    try {
+      await supabase.from("blocks").insert({ blocker_id: account.userId, blocked_id: userId });
+    } catch (e) {}
+  };
+
+  const handleUnblock = async (userId) => {
+    setBlockedIds((prev) => prev.filter((id) => id !== userId));
+    try {
+      await supabase.from("blocks").delete().eq("blocker_id", account.userId).eq("blocked_id", userId);
     } catch (e) {}
   };
 
@@ -1503,6 +1802,65 @@ export default function Reflection() {
     );
   }
 
+  if (passwordRecovery) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh", fontFamily: "'Work Sans', sans-serif", display: "flex",
+          alignItems: "center", justifyContent: "center", padding: "24px", position: "relative", overflow: "hidden",
+          background: "radial-gradient(circle at 25% 15%, rgba(229,193,181,0.16), transparent 45%), radial-gradient(circle at 80% 75%, rgba(142,106,94,0.20), transparent 50%), linear-gradient(160deg, #0b1220 0%, #16202f 45%, #1c2436 75%, #241d2c 100%)",
+        }}
+      >
+        <GlobalStyle theme={THEMES[themeKey]} fontFamily={currentFont} />
+        <div style={{ position: "absolute", inset: 0, background: "#0a0e17", opacity: 0.6, pointerEvents: "none" }} />
+        <div
+          style={{
+            position: "relative", zIndex: 1, width: "100%", maxWidth: 400,
+            background: "rgba(30, 41, 59, 0.65)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: 16, padding: "32px 28px",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.45)", textAlign: "center",
+          }}
+        >
+          <h1 className="rf-display" style={{ fontSize: 26, fontStyle: "italic", color: "#E5C1B5", marginBottom: 6 }}>{t.resetTitle}</h1>
+          {!resetDone ? (
+            <>
+              <p style={{ color: "rgba(229,231,235,0.65)", fontSize: 14, marginBottom: 22 }}>{t.resetSubtitle}</p>
+              <form onSubmit={handleResetPassword} style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12 }}>
+                <input
+                  type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder={t.resetNewPasswordPh} className="rf-auth-input"
+                  style={{ width: "100%", boxSizing: "border-box", padding: "13px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.14)", background: "rgba(15,20,30,0.55)", color: "#f1ede9", fontSize: 14, fontFamily: "'Work Sans', sans-serif" }}
+                />
+                <input
+                  type="password" autoComplete="new-password" value={newPassword2} onChange={(e) => setNewPassword2(e.target.value)}
+                  placeholder={t.resetConfirmPasswordPh} className="rf-auth-input"
+                  style={{ width: "100%", boxSizing: "border-box", padding: "13px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.14)", background: "rgba(15,20,30,0.55)", color: "#f1ede9", fontSize: 14, fontFamily: "'Work Sans', sans-serif" }}
+                />
+                {resetError && <p style={{ color: "#e8a191", fontSize: 13, margin: 0 }}>{resetError}</p>}
+                <button
+                  type="submit" disabled={resetSaving}
+                  style={{ background: "linear-gradient(135deg, #C29B8C 0%, #8E6A5E 100%)", border: "none", color: "#fff", padding: "13px 26px", fontSize: 15, borderRadius: 10, cursor: resetSaving ? "default" : "pointer", opacity: resetSaving ? 0.7 : 1, boxShadow: "0 8px 20px rgba(142,106,94,0.35)" }}
+                >
+                  {resetSaving ? t.resetSubmitBtnLoading : t.resetSubmitBtn}
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <p style={{ color: "rgba(229,231,235,0.75)", fontSize: 14, marginBottom: 22 }}>{t.resetSuccess}</p>
+              <button
+                onClick={() => setPasswordRecovery(false)}
+                style={{ background: "linear-gradient(135deg, #C29B8C 0%, #8E6A5E 100%)", border: "none", color: "#fff", padding: "13px 26px", fontSize: 15, borderRadius: 10, cursor: "pointer", boxShadow: "0 8px 20px rgba(142,106,94,0.35)" }}
+              >
+                {t.resetContinueBtn}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <div
@@ -1591,7 +1949,7 @@ export default function Reflection() {
             <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.14)" }} />
           </div>
 
-          <form onSubmit={handleEmailAuthSubmit} style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12 }}>
+          <form onSubmit={authMode === "forgot" ? handleForgotPassword : handleEmailAuthSubmit} style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12 }}>
             <input
               type="email"
               autoComplete="email"
@@ -1605,19 +1963,31 @@ export default function Reflection() {
                 fontSize: 14, fontFamily: "'Work Sans', sans-serif",
               }}
             />
-            <input
-              type="password"
-              autoComplete={authMode === "login" ? "current-password" : "new-password"}
-              value={authPassword}
-              onChange={(e) => setAuthPassword(e.target.value)}
-              placeholder={t.authPasswordPh}
-              className="rf-auth-input"
-              style={{
-                width: "100%", boxSizing: "border-box", padding: "13px 16px", borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.14)", background: "rgba(15,20,30,0.55)", color: "#f1ede9",
-                fontSize: 14, fontFamily: "'Work Sans', sans-serif",
-              }}
-            />
+            {authMode !== "forgot" && (
+              <input
+                type="password"
+                autoComplete={authMode === "login" ? "current-password" : "new-password"}
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                placeholder={t.authPasswordPh}
+                className="rf-auth-input"
+                style={{
+                  width: "100%", boxSizing: "border-box", padding: "13px 16px", borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.14)", background: "rgba(15,20,30,0.55)", color: "#f1ede9",
+                  fontSize: 14, fontFamily: "'Work Sans', sans-serif",
+                }}
+              />
+            )}
+
+            {authMode === "login" && (
+              <button
+                type="button"
+                onClick={() => { setAuthMode("forgot"); setAuthError(""); setAuthNotice(""); }}
+                style={{ background: "none", border: "none", color: "rgba(229,231,235,0.55)", fontSize: 12.5, textDecoration: "underline", cursor: "pointer", padding: 0, textAlign: "right" }}
+              >
+                {t.authForgotLink}
+              </button>
+            )}
 
             {authError && <p style={{ color: "#e8a191", fontSize: 13, margin: 0 }}>{authError}</p>}
             {authNotice && <p style={{ color: "rgba(229,231,235,0.7)", fontSize: 13, margin: 0 }}>{authNotice}</p>}
@@ -1632,7 +2002,9 @@ export default function Reflection() {
                 opacity: authLoading ? 0.7 : 1, boxShadow: "0 8px 20px rgba(142,106,94,0.35)",
               }}
             >
-              {authMode === "login"
+              {authMode === "forgot"
+                ? (authLoading ? t.authSendResetBtnLoading : t.authSendResetBtn)
+                : authMode === "login"
                 ? (authLoading ? t.authLoginBtnLoading : t.authLoginBtn)
                 : (authLoading ? t.authSignupBtnLoading : t.authSignupBtn)}
             </button>
@@ -1640,16 +2012,23 @@ export default function Reflection() {
             <button
               type="button"
               onClick={() => {
-                setAuthMode((m) => (m === "login" ? "signup" : "login"));
+                setAuthMode((m) => (m === "forgot" ? "login" : m === "login" ? "signup" : "login"));
                 setAuthError("");
                 setAuthNotice("");
               }}
               style={{ background: "none", border: "none", color: "rgba(229,231,235,0.6)", fontSize: 13, textDecoration: "underline", cursor: "pointer", padding: 4 }}
             >
-              {authMode === "login" ? t.authSwitchToSignup : t.authSwitchToLogin}
+              {authMode === "forgot" ? t.authBackToLogin : authMode === "login" ? t.authSwitchToSignup : t.authSwitchToLogin}
             </button>
           </form>
+
+          <p style={{ marginTop: 22, fontSize: 11.5, color: "rgba(229,231,235,0.4)" }}>
+            <button type="button" onClick={() => setLegalPage("privacy")} style={{ background: "none", border: "none", color: "rgba(229,231,235,0.5)", fontSize: 11.5, textDecoration: "underline", cursor: "pointer", padding: 0 }}>{t.legalPrivacyLink}</button>
+            {" · "}
+            <button type="button" onClick={() => setLegalPage("terms")} style={{ background: "none", border: "none", color: "rgba(229,231,235,0.5)", fontSize: 11.5, textDecoration: "underline", cursor: "pointer", padding: 0 }}>{t.legalTermsLink}</button>
+          </p>
         </div>
+        <LegalModal page={legalPage} onClose={() => setLegalPage(null)} t={t} lang={lang} />
       </div>
     );
   }
@@ -1826,7 +2205,7 @@ export default function Reflection() {
                   const tr = translations[trKey];
                   const showingTr = tr?.showing && tr?.text;
                   return (
-                    <div key={post.id} className="rf-card" style={{ padding: 18 }}>
+                    <div key={post.id} className="rf-card" style={{ padding: 18, position: "relative" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                         <button onClick={() => openProfile(post.userId)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                           <Avatar profile={author} size={36} />
@@ -1840,6 +2219,32 @@ export default function Reflection() {
                           </p>
                         </div>
                         <span style={{ width: 9, height: 9, borderRadius: "50%", background: m.color, display: "inline-block" }} />
+                        {post.userId !== account.userId && (
+                          <div style={{ position: "relative" }}>
+                            <button
+                              onClick={() => setOpenMenuPostId((cur) => (cur === post.id ? null : post.id))}
+                              style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 18, cursor: "pointer", padding: "0 4px" }}
+                            >
+                              ⋯
+                            </button>
+                            {openMenuPostId === post.id && (
+                              <div style={{ position: "absolute", right: 0, top: 24, background: "var(--paper-card)", border: "1px solid var(--line)", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.18)", zIndex: 20, minWidth: 170, overflow: "hidden" }}>
+                                <button
+                                  onClick={() => { setReportModal({ postId: post.id, userId: post.userId }); setOpenMenuPostId(null); }}
+                                  style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13.5, color: "var(--ink)" }}
+                                >
+                                  {t.reportAction}
+                                </button>
+                                <button
+                                  onClick={() => handleBlock(post.userId)}
+                                  style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 14px", background: "none", border: "none", borderTop: "1px solid var(--line)", cursor: "pointer", fontSize: 13.5, color: "#B5654A" }}
+                                >
+                                  {t.blockAction}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                       {post.title && <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 16 }}>{showingTr && tr.title ? tr.title : post.title}</p>}
                       <MediaBlock url={post.mediaUrl} type={post.mediaType} alt={post.title} />
@@ -2110,11 +2515,25 @@ export default function Reflection() {
                 {displayedProfile.bio && <p style={{ fontSize: 14, color: "var(--ink-soft)", lineHeight: 1.6, marginBottom: 16 }}>{displayedProfile.bio}</p>}
 
                 {!isOwnProfile && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 22 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 22, flexWrap: "wrap" }}>
                     <button className="rf-btn" onClick={() => toggleFollow(viewingUserId)} style={{ background: followingList.includes(viewingUserId) ? "var(--paper-card)" : "var(--clay)", border: followingList.includes(viewingUserId) ? "1px solid var(--line)" : "none", color: followingList.includes(viewingUserId) ? "var(--ink-soft)" : "var(--paper)", padding: "9px 20px", fontSize: 14 }}>
                       {followingList.includes(viewingUserId) ? t.following : t.follow}
                     </button>
                     {followerCount !== null && <span className="rf-mono" style={{ fontSize: 12, color: "var(--ink-soft)" }}>{followerCount} {t.followers}</span>}
+                    {blockedIds.includes(viewingUserId) ? (
+                      <button onClick={() => handleUnblock(viewingUserId)} style={{ background: "none", border: "1px solid var(--line)", color: "var(--ink-soft)", fontSize: 12.5, padding: "6px 12px", borderRadius: 999, cursor: "pointer" }}>
+                        {t.unblockAction}
+                      </button>
+                    ) : (
+                      <>
+                        <button onClick={() => setReportModal({ postId: null, userId: viewingUserId })} style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 12.5, cursor: "pointer", padding: 0 }}>
+                          {t.reportAction}
+                        </button>
+                        <button onClick={() => handleBlock(viewingUserId)} style={{ background: "none", border: "none", color: "#B5654A", fontSize: 12.5, cursor: "pointer", padding: 0 }}>
+                          {t.blockAction}
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -2186,6 +2605,22 @@ export default function Reflection() {
           </section>
         )}
       </main>
+      <footer style={{ textAlign: "center", padding: "20px 20px 40px", fontSize: 11.5, color: "var(--ink-soft)" }}>
+        <button type="button" onClick={() => setLegalPage("privacy")} style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 11.5, textDecoration: "underline", cursor: "pointer", padding: 0 }}>{t.legalPrivacyLink}</button>
+        {" · "}
+        <button type="button" onClick={() => setLegalPage("terms")} style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 11.5, textDecoration: "underline", cursor: "pointer", padding: 0 }}>{t.legalTermsLink}</button>
+      </footer>
+      <LegalModal page={legalPage} onClose={() => setLegalPage(null)} t={t} lang={lang} />
+      <ReportModal
+        open={!!reportModal}
+        onClose={closeReportModal}
+        reason={reportReason}
+        setReason={setReportReason}
+        onSubmit={submitReport}
+        sending={reportSending}
+        done={reportDone}
+        t={t}
+      />
     </div>
   );
 }
