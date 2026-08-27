@@ -98,6 +98,20 @@ const T = {
     blockConfirmBtn: "Ya, Blokir",
     blockedListEmpty: "Kamu belum memblokir siapa pun.",
     blockedListTitle: "Pengguna yang Diblokir",
+    errorOffline: "Kamu lagi offline. Periksa koneksi internet dan coba lagi.",
+    errorSaveFailed: "Refleksi belum tersimpan. Periksa koneksi internet dan coba lagi.",
+    errorMediaUpload: "Gagal mengunggah foto/video. Coba dengan file yang lebih kecil atau periksa koneksi kamu.",
+    draftRestoredNote: "Draf sebelumnya dipulihkan otomatis.",
+    draftSavedNote: "Draf tersimpan otomatis",
+    dangerZoneTitle: "Zona Berbahaya",
+    deleteAccountBtn: "Hapus Akun Saya",
+    deleteAccountWarning: "Ini akan menghapus akun kamu secara permanen, termasuk semua refleksi, post, dan data profil. Tindakan ini tidak bisa dibatalkan.",
+    deleteAccountConfirmPh: "Ketik HAPUS untuk konfirmasi",
+    deleteAccountConfirmBtn: "Hapus Permanen",
+    deleteAccountCancel: "Batal",
+    deleteAccountTypeError: "Ketik \"HAPUS\" (huruf besar) buat konfirmasi.",
+    deleteAccountDone: "Data akun kamu sudah dihapus. Kamu akan keluar sekarang.",
+    deleteAccountFailed: "Gagal menghapus akun. Coba lagi atau hubungi kami.",
     empty_journal: "Belum ada refleksi. Tulisan pertamamu akan muncul di sini.",
     streak: "hari beruntun",
     totalEntries: "total refleksi",
@@ -294,6 +308,20 @@ const T = {
     blockConfirmBtn: "Yes, Block",
     blockedListEmpty: "You haven't blocked anyone yet.",
     blockedListTitle: "Blocked Users",
+    errorOffline: "You're offline. Check your internet connection and try again.",
+    errorSaveFailed: "Your reflection wasn't saved. Check your internet connection and try again.",
+    errorMediaUpload: "Failed to upload the photo/video. Try a smaller file or check your connection.",
+    draftRestoredNote: "Your previous draft was restored automatically.",
+    draftSavedNote: "Draft auto-saved",
+    dangerZoneTitle: "Danger Zone",
+    deleteAccountBtn: "Delete My Account",
+    deleteAccountWarning: "This permanently deletes your account, including all reflections, posts, and profile data. This cannot be undone.",
+    deleteAccountConfirmPh: "Type DELETE to confirm",
+    deleteAccountConfirmBtn: "Delete Permanently",
+    deleteAccountCancel: "Cancel",
+    deleteAccountTypeError: "Type \"DELETE\" (all caps) to confirm.",
+    deleteAccountDone: "Your account data has been deleted. You'll be signed out now.",
+    deleteAccountFailed: "Failed to delete account. Please try again or contact us.",
     empty_journal: "No reflections yet. Your first entry will appear here.",
     streak: "day streak",
     totalEntries: "total entries",
@@ -1008,6 +1036,12 @@ export default function Reflection() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
   const [selectedDate, setSelectedDate] = useState(null);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState(null);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [deleteAccountConfirmText, setDeleteAccountConfirmText] = useState("");
+  const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState("");
   const [translations, setTranslations] = useState({});
   const [legalPage, setLegalPage] = useState(null); // "privacy" | "terms" | null
   const [searchQuery, setSearchQuery] = useState("");
@@ -1015,6 +1049,7 @@ export default function Reflection() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [promptIndex, setPromptIndex] = useState(0);
   const [saveState, setSaveState] = useState("idle");
+  const [saveError, setSaveError] = useState("");
   const [feed, setFeed] = useState([]);
   const [blockedIds, setBlockedIds] = useState([]);
   const [reportModal, setReportModal] = useState(null); // { postId, userId } | null
@@ -1325,6 +1360,51 @@ export default function Reflection() {
     return () => clearTimeout(handle);
   }, [searchQuery, blockedIds]);
 
+  // Autosave draft: restore once when the account is known, then keep saving as the person types.
+  useEffect(() => {
+    if (!account) return;
+    try {
+      const raw = localStorage.getItem(`reflection_draft_${account.userId}`);
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (draft && (draft.text || draft.title)) {
+          setText(draft.text || "");
+          setTitle(draft.title || "");
+          if (draft.mood) setMood(draft.mood);
+          if (typeof draft.publish === "boolean") setPublish(draft.publish);
+          setDraftRestored(true);
+        }
+      }
+    } catch (e) {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.userId]);
+
+  useEffect(() => {
+    if (!account) return;
+    const handle = setTimeout(() => {
+      try {
+        if (text.trim() || title.trim()) {
+          localStorage.setItem(
+            `reflection_draft_${account.userId}`,
+            JSON.stringify({ text, title, mood, publish, savedAt: Date.now() })
+          );
+          setDraftSavedAt(Date.now());
+        } else {
+          localStorage.removeItem(`reflection_draft_${account.userId}`);
+          setDraftSavedAt(null);
+        }
+      } catch (e) {}
+    }, 600);
+    return () => clearTimeout(handle);
+  }, [text, title, mood, publish, account]);
+
+  const clearDraft = () => {
+    if (!account) return;
+    try { localStorage.removeItem(`reflection_draft_${account.userId}`); } catch (e) {}
+    setDraftSavedAt(null);
+    setDraftRestored(false);
+  };
+
   const currentPrompt = PROMPTS[promptIndex];
   const streak = useMemo(() => computeStreak(entries), [entries]);
   const thisWeekCount = useMemo(() => entries.filter((e) => e.ts >= Date.now() - 7 * 86400000).length, [entries]);
@@ -1386,6 +1466,12 @@ export default function Reflection() {
   const handleSave = async () => {
     if (!text.trim() || !account) return;
     setSaveState("saving");
+    setSaveError("");
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setSaveState("idle");
+      setSaveError(t.errorOffline);
+      return;
+    }
     try {
       let mediaUrl = null;
       let mType = null;
@@ -1394,7 +1480,7 @@ export default function Reflection() {
         const safeName = mediaFile.name.replace(/[^a-zA-Z0-9_.-]/g, "_");
         const path = `${account.userId}/${uid()}-${safeName}`;
         const { error: upErr } = await supabase.storage.from("reflection-media").upload(path, mediaFile);
-        if (upErr) throw upErr;
+        if (upErr) throw Object.assign(upErr, { stage: "media" });
         const { data: pub } = supabase.storage.from("reflection-media").getPublicUrl(path);
         mediaUrl = pub?.publicUrl || null;
         mType = mediaType;
@@ -1425,10 +1511,12 @@ export default function Reflection() {
         });
       }
       setText(""); setTitle(""); clearMedia(); setPublish(false); setSaveState("saved");
+      clearDraft();
       setTimeout(() => setSaveState("idle"), 2500);
     } catch (e) {
       setUploadingMedia(false);
       setSaveState("idle");
+      setSaveError(e?.stage === "media" ? t.errorMediaUpload : t.errorSaveFailed);
     }
   };
 
@@ -1551,6 +1639,30 @@ export default function Reflection() {
     try {
       await supabase.from("blocks").delete().eq("blocker_id", account.userId).eq("blocked_id", userId);
     } catch (e) {}
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteAccountError("");
+    const expected = lang === "id" ? "HAPUS" : "DELETE";
+    if (deleteAccountConfirmText.trim().toUpperCase() !== expected) {
+      setDeleteAccountError(t.deleteAccountTypeError);
+      return;
+    }
+    setDeleteAccountLoading(true);
+    try {
+      const uidVal = account.userId;
+      await supabase.from("posts").delete().eq("user_id", uidVal);
+      await supabase.from("journal_entries").delete().eq("user_id", uidVal);
+      await supabase.from("follows").delete().eq("follower_id", uidVal);
+      await supabase.from("blocks").delete().eq("blocker_id", uidVal);
+      await supabase.from("reports").delete().eq("reporter_id", uidVal);
+      await supabase.from("profiles").delete().eq("id", uidVal);
+      clearDraft();
+      await supabase.auth.signOut();
+    } catch (e) {
+      setDeleteAccountLoading(false);
+      setDeleteAccountError(t.deleteAccountFailed);
+    }
   };
 
   const stopPreset = useCallback((key) => {
@@ -2430,11 +2542,18 @@ export default function Reflection() {
               <span>{t.publishToggle}<br /><span style={{ fontSize: 12 }}>{t.privateNote}</span></span>
             </label>
 
-            <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
               <button className="rf-btn" onClick={handleSave} disabled={!text.trim() || saveState === "saving"} style={{ background: "var(--clay)", color: "var(--paper)", padding: "12px 26px", fontSize: 15 }}>{t.save}</button>
               {uploadingMedia && <span style={{ fontSize: 13, color: "var(--ink-soft)" }}>{t.uploadingMedia}</span>}
               {saveState === "saved" && <span style={{ fontSize: 13, color: "var(--moss)" }}>{t.saved}</span>}
+              {saveState !== "saving" && !uploadingMedia && draftSavedAt && text.trim() && (
+                <span style={{ fontSize: 11.5, color: "var(--ink-soft)", opacity: 0.75 }}>💾 {t.draftSavedNote}</span>
+              )}
             </div>
+            {saveError && <p style={{ color: "#B5654A", fontSize: 13, marginTop: 8 }}>⚠️ {saveError}</p>}
+            {draftRestored && text.trim() && (
+              <p style={{ color: "var(--ink-soft)", fontSize: 12.5, marginTop: 6, fontStyle: "italic" }}>{t.draftRestoredNote}</p>
+            )}
 
             <div style={{ marginTop: 30 }}>
               <button onClick={() => setCalendarOpen((v) => !v)} className="rf-btn" style={{ background: "transparent", border: "1px solid var(--line)", color: "var(--ink-soft)", padding: "7px 14px", fontSize: 13 }}>
@@ -2565,6 +2684,44 @@ export default function Reflection() {
                           </div>
                         ))}
                       </div>
+                    </div>
+                    <div className="rf-card" style={{ padding: 22, marginBottom: 28, border: "1px solid rgba(181,101,74,0.35)" }}>
+                      <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 6px", color: "#B5654A" }}>{t.dangerZoneTitle}</p>
+                      <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>{t.deleteAccountWarning}</p>
+                      {!deleteAccountOpen ? (
+                        <button
+                          onClick={() => setDeleteAccountOpen(true)}
+                          style={{ background: "none", border: "1px solid #B5654A", color: "#B5654A", padding: "8px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer" }}
+                        >
+                          {t.deleteAccountBtn}
+                        </button>
+                      ) : (
+                        <div>
+                          <input
+                            className="rf-input"
+                            style={{ width: "100%", maxWidth: 280, boxSizing: "border-box", marginBottom: 10 }}
+                            placeholder={t.deleteAccountConfirmPh}
+                            value={deleteAccountConfirmText}
+                            onChange={(e) => setDeleteAccountConfirmText(e.target.value)}
+                          />
+                          {deleteAccountError && <p style={{ color: "#B5654A", fontSize: 12.5, marginBottom: 8 }}>{deleteAccountError}</p>}
+                          <div style={{ display: "flex", gap: 10 }}>
+                            <button
+                              onClick={handleDeleteAccount}
+                              disabled={deleteAccountLoading}
+                              style={{ background: "#B5654A", border: "none", color: "#fff", padding: "9px 18px", borderRadius: 8, fontSize: 13, cursor: "pointer", opacity: deleteAccountLoading ? 0.7 : 1 }}
+                            >
+                              {deleteAccountLoading ? "…" : t.deleteAccountConfirmBtn}
+                            </button>
+                            <button
+                              onClick={() => { setDeleteAccountOpen(false); setDeleteAccountConfirmText(""); setDeleteAccountError(""); }}
+                              style={{ background: "none", border: "1px solid var(--line)", color: "var(--ink-soft)", padding: "9px 18px", borderRadius: 8, fontSize: 13, cursor: "pointer" }}
+                            >
+                              {t.deleteAccountCancel}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
