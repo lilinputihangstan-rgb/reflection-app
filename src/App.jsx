@@ -109,6 +109,11 @@ const T = {
     exportMarkdownBtn: "⬇️ Unduh sebagai Markdown (.md)",
     exportJsonBtn: "⬇️ Unduh sebagai JSON (.json)",
     exportEmpty: "Belum ada refleksi buat diekspor.",
+    voiceStart: "🎙️ Rekam suara",
+    voiceStop: "⏹️ Berhenti merekam",
+    voiceListening: "Mendengarkan… ngomong aja, nanti otomatis ketulis.",
+    voiceUnsupported: "Browser kamu belum mendukung rekam suara. Coba pakai Chrome di HP/laptop.",
+    voiceError: "Gagal merekam suara. Coba lagi atau periksa izin mikrofon.",
     deleteAccountBtn: "Hapus Akun Saya",
     deleteAccountWarning: "Ini akan menghapus akun kamu secara permanen, termasuk semua refleksi, post, dan data profil. Tindakan ini tidak bisa dibatalkan.",
     deleteAccountConfirmPh: "Ketik HAPUS untuk konfirmasi",
@@ -345,6 +350,11 @@ const T = {
     exportMarkdownBtn: "⬇️ Download as Markdown (.md)",
     exportJsonBtn: "⬇️ Download as JSON (.json)",
     exportEmpty: "No reflections to export yet.",
+    voiceStart: "🎙️ Record voice",
+    voiceStop: "⏹️ Stop recording",
+    voiceListening: "Listening… just talk, it'll be typed automatically.",
+    voiceUnsupported: "Your browser doesn't support voice recording. Try Chrome on your phone/laptop.",
+    voiceError: "Voice recording failed. Try again or check microphone permission.",
     deleteAccountBtn: "Delete My Account",
     deleteAccountWarning: "This permanently deletes your account, including all reflections, posts, and profile data. This cannot be undone.",
     deleteAccountConfirmPh: "Type DELETE to confirm",
@@ -1134,6 +1144,11 @@ export default function Reflection() {
   const [moodIntensity, setMoodIntensity] = useState(3);
   const [selectedTags, setSelectedTags] = useState([]);
   const [journalQuery, setJournalQuery] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(true);
+  const [voiceError, setVoiceError] = useState("");
+  const recognitionRef = useRef(null);
+  const textBeforeVoiceRef = useRef("");
   const [tagFilter, setTagFilter] = useState(null);
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
@@ -1711,6 +1726,51 @@ export default function Reflection() {
       setFollowerCount(count || 0);
     } catch (e) {}
   };
+
+  const toggleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setVoiceSupported(false);
+      setVoiceError(t.voiceUnsupported);
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+    setVoiceError("");
+    textBeforeVoiceRef.current = text;
+    const recognition = new SpeechRecognition();
+    recognition.lang = lang === "id" ? "id-ID" : "en-US";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.onresult = (event) => {
+      let finalTranscript = "";
+      let interimTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalTranscript += transcript;
+        else interimTranscript += transcript;
+      }
+      const base = textBeforeVoiceRef.current;
+      const separator = base && !base.endsWith(" ") && !base.endsWith("\n") ? " " : "";
+      setText(base + separator + finalTranscript + interimTranscript);
+      if (finalTranscript) textBeforeVoiceRef.current = base + separator + finalTranscript;
+    };
+    recognition.onerror = () => {
+      setVoiceError(t.voiceError);
+      setIsListening(false);
+    };
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  };
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    setVoiceSupported(!!SpeechRecognition);
+  }, []);
 
   const toggleFollow = async (userId) => {
     if (!account) return;
@@ -2703,6 +2763,24 @@ export default function Reflection() {
 
             <div style={{ marginTop: 20 }}>
               <textarea className="rf-textarea" placeholder={t.writePlaceholder} value={text} onChange={(e) => setText(e.target.value)} />
+              {voiceSupported && (
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    onClick={toggleVoiceInput}
+                    style={{
+                      background: isListening ? "#B5654A" : "transparent",
+                      color: isListening ? "#fff" : "var(--ink-soft)",
+                      border: isListening ? "1px solid #B5654A" : "1px solid var(--line)",
+                      borderRadius: 999, padding: "6px 14px", fontSize: 12.5, cursor: "pointer",
+                    }}
+                  >
+                    {isListening ? t.voiceStop : t.voiceStart}
+                  </button>
+                  {isListening && <span style={{ fontSize: 12, color: "var(--ink-soft)", marginLeft: 10, fontStyle: "italic" }}>{t.voiceListening}</span>}
+                  {voiceError && <p style={{ color: "#B5654A", fontSize: 12, marginTop: 6 }}>{voiceError}</p>}
+                </div>
+              )}
             </div>
 
             <div style={{ marginTop: 12 }}>
