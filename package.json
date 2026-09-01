@@ -1,21 +1,15 @@
 {
-  "name": "reflection-app",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tone": "^15.0.4"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.0"
-  }
+  "name": "Reflection — Ruang untuk merenung",
+  "short_name": "Reflection",
+  "description": "Tulis apa yang kamu rasakan, simpan untuk dirimu sendiri, atau bagikan pada dunia.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#16202f",
+  "theme_color": "#16202f",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/favicon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
 }
