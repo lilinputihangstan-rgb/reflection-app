@@ -112,6 +112,27 @@ const T = {
     deleteAccountTypeError: "Ketik \"HAPUS\" (huruf besar) buat konfirmasi.",
     deleteAccountDone: "Data akun kamu sudah dihapus. Kamu akan keluar sekarang.",
     deleteAccountFailed: "Gagal menghapus akun. Coba lagi atau hubungi kami.",
+    onboardWelcomeTitle: "Selamat datang di Reflection 🌿",
+    onboardWelcomeBody: "Ruang kecil buat nulis apa yang kamu rasakan dan pikirkan. Cuma untukmu sendiri, atau boleh dibagikan — kamu yang tentukan.",
+    onboardStep1: "Pilih mood yang paling menggambarkan perasaanmu sekarang.",
+    onboardStep2: "Tulis bebas, atau jawab pertanyaan pemantik di atas.",
+    onboardStep3: "Centang \"Publikasikan ke Beranda\" cuma kalau kamu mau refleksi ini dilihat orang lain. Kalau enggak, aman tersimpan buat kamu sendiri.",
+    onboardStep4: "Klik \"Simpan refleksi\". Refleksi pertamamu akan muncul di bawah, dan kamu bisa lihat perkembangannya dari waktu ke waktu.",
+    intensityLabel: "Seberapa kuat perasaan ini?",
+    intensityLow: "Ringan",
+    intensityHigh: "Kuat",
+    tagsLabel: "Tag (opsional, pilih yang cocok)",
+    tag_kuliah: "Kuliah", tag_keluarga: "Keluarga", tag_kesehatan: "Kesehatan", tag_uang: "Uang", tag_hubungan: "Hubungan", tag_kerja: "Kerja/Karier", tag_diri: "Diri Sendiri",
+    journalSearchPh: "Cari di refleksimu…",
+    filterByTag: "Filter tag:",
+    filterAllTags: "Semua",
+    journalSearchNoResults: "Nggak ada refleksi yang cocok dengan pencarian/filter ini.",
+    weeklySummaryTitle: "Ringkasan Minggu Ini",
+    weeklySummaryEmpty: "Belum ada refleksi minggu ini. Yuk mulai nulis!",
+    weeklySummaryCount: "refleksi ditulis",
+    weeklySummaryDominantMood: "Mood yang paling sering muncul:",
+    weeklySummaryAvgIntensity: "Rata-rata intensitas:",
+    weeklySummaryTopTags: "Topik yang sering muncul:",
     empty_journal: "Belum ada refleksi. Tulisan pertamamu akan muncul di sini.",
     streak: "hari beruntun",
     totalEntries: "total refleksi",
@@ -322,6 +343,27 @@ const T = {
     deleteAccountTypeError: "Type \"DELETE\" (all caps) to confirm.",
     deleteAccountDone: "Your account data has been deleted. You'll be signed out now.",
     deleteAccountFailed: "Failed to delete account. Please try again or contact us.",
+    onboardWelcomeTitle: "Welcome to Reflection 🌿",
+    onboardWelcomeBody: "A small space to write what you're feeling and thinking. Just for you, or shareable — your choice.",
+    onboardStep1: "Pick the mood that best describes how you feel right now.",
+    onboardStep2: "Write freely, or answer the prompt above.",
+    onboardStep3: "Check \"Publish to Feed\" only if you want this reflection seen by others. Otherwise, it stays safely private to you.",
+    onboardStep4: "Click \"Save reflection\". Your first entry will appear below, and you can watch your progress over time.",
+    intensityLabel: "How strong is this feeling?",
+    intensityLow: "Mild",
+    intensityHigh: "Strong",
+    tagsLabel: "Tags (optional, pick what fits)",
+    tag_kuliah: "Study", tag_keluarga: "Family", tag_kesehatan: "Health", tag_uang: "Money", tag_hubungan: "Relationships", tag_kerja: "Work/Career", tag_diri: "Self",
+    journalSearchPh: "Search your reflections…",
+    filterByTag: "Filter by tag:",
+    filterAllTags: "All",
+    journalSearchNoResults: "No reflections match this search/filter.",
+    weeklySummaryTitle: "This Week's Summary",
+    weeklySummaryEmpty: "No reflections yet this week. Time to start writing!",
+    weeklySummaryCount: "reflections written",
+    weeklySummaryDominantMood: "Most frequent mood:",
+    weeklySummaryAvgIntensity: "Average intensity:",
+    weeklySummaryTopTags: "Common topics:",
     empty_journal: "No reflections yet. Your first entry will appear here.",
     streak: "day streak",
     totalEntries: "total entries",
@@ -471,6 +513,16 @@ const MOODS = [
   { key: "heavy", color: "var(--ink-soft)" },
   { key: "confused", color: "var(--rose)" },
   { key: "happy", color: "var(--clay)" },
+];
+
+const TAGS = [
+  { key: "kuliah", id_: "Kuliah", en: "Study" },
+  { key: "keluarga", id_: "Keluarga", en: "Family" },
+  { key: "kesehatan", id_: "Kesehatan", en: "Health" },
+  { key: "uang", id_: "Uang", en: "Money" },
+  { key: "hubungan", id_: "Hubungan", en: "Relationships" },
+  { key: "kerja", id_: "Kerja/Karier", en: "Work/Career" },
+  { key: "diri", id_: "Diri Sendiri", en: "Self" },
 ];
 
 const AVATAR_EMOJIS = ["🌿", "🍂", "🌾", "🕯️", "🫖", "📖", "🌙", "☀️", "🍁", "🌻", "🪴", "🦋"];
@@ -661,6 +713,8 @@ function mapEntryRow(row) {
     id: row.id,
     ts: new Date(row.ts).getTime(),
     mood: row.mood,
+    moodIntensity: row.mood_intensity || 3,
+    tags: row.tags || [],
     text: row.text,
     title: row.title || "",
     mediaUrl: row.media_url || null,
@@ -676,6 +730,8 @@ function mapPostRow(row, likes = [], comments = []) {
     entryId: row.entry_id || null,
     ts: new Date(row.ts).getTime(),
     mood: row.mood,
+    moodIntensity: row.mood_intensity || 3,
+    tags: row.tags || [],
     text: row.text,
     title: row.title || "",
     mediaUrl: row.media_url || null,
@@ -727,6 +783,44 @@ function MediaBlock({ url, type, alt = "" }) {
       )}
     </div>
   );
+}
+function IntensityDots({ value = 3, color = "var(--clay)" }) {
+  return (
+    <span style={{ display: "inline-flex", gap: 2, alignItems: "center" }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span key={i} style={{ width: 5, height: 5, borderRadius: "50%", background: i <= value ? color : "var(--line)", display: "inline-block" }} />
+      ))}
+    </span>
+  );
+}
+function startOfWeek(d) {
+  const dt = new Date(d);
+  const day = dt.getDay(); // 0=Sun
+  const diff = day === 0 ? -6 : 1 - day; // Monday as start
+  dt.setDate(dt.getDate() + diff);
+  dt.setHours(0, 0, 0, 0);
+  return dt;
+}
+function weeklySummary(entries) {
+  const weekStart = startOfWeek(new Date()).getTime();
+  const weekEntries = entries.filter((e) => e.ts >= weekStart);
+  const moodCounts = {};
+  const tagCounts = {};
+  let intensitySum = 0;
+  weekEntries.forEach((e) => {
+    moodCounts[e.mood] = (moodCounts[e.mood] || 0) + 1;
+    intensitySum += e.moodIntensity || 3;
+    (e.tags || []).forEach((tg) => { tagCounts[tg] = (tagCounts[tg] || 0) + 1; });
+  });
+  let dominantMood = null, maxCount = 0;
+  Object.entries(moodCounts).forEach(([k, v]) => { if (v > maxCount) { maxCount = v; dominantMood = k; } });
+  const topTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => k);
+  return {
+    count: weekEntries.length,
+    dominantMood,
+    avgIntensity: weekEntries.length ? (intensitySum / weekEntries.length).toFixed(1) : null,
+    topTags,
+  };
 }
 function MiniCalendar({ entries, viewMonth, onChangeMonth, selectedDate, onSelectDate, lang }) {
   const year = viewMonth.getFullYear();
@@ -1027,6 +1121,10 @@ export default function Reflection() {
   const [mood, setMood] = useState("calm");
   const [text, setText] = useState("");
   const [title, setTitle] = useState("");
+  const [moodIntensity, setMoodIntensity] = useState(3);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [journalQuery, setJournalQuery] = useState("");
+  const [tagFilter, setTagFilter] = useState(null);
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
   const [mediaType, setMediaType] = useState(null); // "image" | "video" | null
@@ -1042,6 +1140,7 @@ export default function Reflection() {
   const [deleteAccountConfirmText, setDeleteAccountConfirmText] = useState("");
   const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
   const [deleteAccountError, setDeleteAccountError] = useState("");
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
   const [translations, setTranslations] = useState({});
   const [legalPage, setLegalPage] = useState(null); // "privacy" | "terms" | null
   const [searchQuery, setSearchQuery] = useState("");
@@ -1364,6 +1463,21 @@ export default function Reflection() {
   useEffect(() => {
     if (!account) return;
     try {
+      if (localStorage.getItem(`reflection_onboarding_dismissed_${account.userId}`) === "1") {
+        setOnboardingDismissed(true);
+      }
+    } catch (e) {}
+  }, [account?.userId]);
+
+  const dismissOnboarding = () => {
+    setOnboardingDismissed(true);
+    if (!account) return;
+    try { localStorage.setItem(`reflection_onboarding_dismissed_${account.userId}`, "1"); } catch (e) {}
+  };
+
+  useEffect(() => {
+    if (!account) return;
+    try {
       const raw = localStorage.getItem(`reflection_draft_${account.userId}`);
       if (raw) {
         const draft = JSON.parse(raw);
@@ -1491,6 +1605,8 @@ export default function Reflection() {
         .insert({
           user_id: account.userId,
           mood,
+          mood_intensity: moodIntensity,
+          tags: selectedTags.length ? selectedTags : null,
           text: text.trim(),
           title: title.trim() || null,
           media_url: mediaUrl,
@@ -1505,13 +1621,15 @@ export default function Reflection() {
       setEntries((prev) => [entry, ...prev]);
       if (publish) {
         await supabase.from("posts").insert({
-          user_id: account.userId, mood, text: entry.text,
-          title: title.trim() || null, media_url: mediaUrl, media_type: mType,
+          user_id: account.userId, mood, mood_intensity: moodIntensity, tags: selectedTags.length ? selectedTags : null,
+          text: entry.text, title: title.trim() || null, media_url: mediaUrl, media_type: mType,
           entry_id: entry.id,
         });
       }
       setText(""); setTitle(""); clearMedia(); setPublish(false); setSaveState("saved");
+      setMoodIntensity(3); setSelectedTags([]);
       clearDraft();
+      dismissOnboarding();
       setTimeout(() => setSaveState("idle"), 2500);
     } catch (e) {
       setUploadingMedia(false);
@@ -2404,6 +2522,28 @@ export default function Reflection() {
         {tab === "journal" && (
           <section>
             <p className="rf-mono" style={{ fontSize: 12, letterSpacing: 1, textTransform: "uppercase", color: "var(--ink-soft)", margin: "0 0 4px" }}>{greeting()} · {formatDate(Date.now(), lang)}</p>
+
+            {entries.length === 0 && !onboardingDismissed && (
+              <div className="rf-card" style={{ padding: 20, marginTop: 14, border: "1px solid var(--clay)", position: "relative" }}>
+                <button
+                  onClick={dismissOnboarding}
+                  style={{ position: "absolute", top: 12, right: 14, background: "none", border: "none", fontSize: 16, color: "var(--ink-soft)", cursor: "pointer" }}
+                >
+                  ✕
+                </button>
+                <p className="rf-display" style={{ fontSize: 18, margin: "0 0 6px", paddingRight: 20 }}>{t.onboardWelcomeTitle}</p>
+                <p style={{ fontSize: 13.5, color: "var(--ink-soft)", margin: "0 0 14px", lineHeight: 1.6 }}>{t.onboardWelcomeBody}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {[t.onboardStep1, t.onboardStep2, t.onboardStep3, t.onboardStep4].map((step, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                      <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--clay)", color: "var(--paper)", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
+                      <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="rf-card" style={{ padding: 22, marginTop: 14 }}>
               <p className="rf-mono" style={{ fontSize: 11, letterSpacing: 1, textTransform: "uppercase", color: "var(--clay)", margin: "0 0 8px" }}>{t.promptLabel}</p>
               <p className="rf-display" style={{ fontSize: 20, lineHeight: 1.4, margin: "0 0 14px" }}>{lang === "id" ? currentPrompt.id_ : currentPrompt.en}</p>
@@ -2506,6 +2646,19 @@ export default function Reflection() {
                   </button>
                 ))}
               </div>
+              <div style={{ marginTop: 14 }}>
+                <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 6px" }}>{t.intensityLabel}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 11, color: "var(--ink-soft)" }}>{t.intensityLow}</span>
+                  <input
+                    type="range" min={1} max={5} step={1} value={moodIntensity}
+                    onChange={(e) => setMoodIntensity(Number(e.target.value))}
+                    style={{ flex: 1, maxWidth: 220, accentColor: "var(--clay)" }}
+                  />
+                  <span style={{ fontSize: 11, color: "var(--ink-soft)" }}>{t.intensityHigh}</span>
+                  <IntensityDots value={moodIntensity} color={(MOODS.find((m) => m.key === mood) || MOODS[0]).color} />
+                </div>
+              </div>
             </div>
 
             <div style={{ marginTop: 20 }}>
@@ -2520,6 +2673,29 @@ export default function Reflection() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 8px" }}>{t.tagsLabel}</p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {TAGS.map((tg) => {
+                  const active = selectedTags.includes(tg.key);
+                  return (
+                    <button
+                      key={tg.key}
+                      onClick={() => setSelectedTags((prev) => (active ? prev.filter((k) => k !== tg.key) : [...prev, tg.key]))}
+                      style={{
+                        background: active ? "var(--clay)" : "transparent",
+                        color: active ? "var(--paper)" : "var(--ink-soft)",
+                        border: active ? "1px solid var(--clay)" : "1px solid var(--line)",
+                        borderRadius: 999, padding: "5px 12px", fontSize: 12.5, cursor: "pointer",
+                      }}
+                    >
+                      {lang === "id" ? tg.id_ : tg.en}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div style={{ marginTop: 12 }}>
@@ -2556,6 +2732,70 @@ export default function Reflection() {
             )}
 
             <div style={{ marginTop: 30 }}>
+              {(() => {
+                const wk = weeklySummary(entries);
+                const dominantMoodObj = wk.dominantMood ? MOODS.find((m) => m.key === wk.dominantMood) : null;
+                return (
+                  <div className="rf-card" style={{ padding: 18, marginBottom: 20 }}>
+                    <p style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: "var(--clay-dark)", margin: "0 0 10px" }}>{t.weeklySummaryTitle}</p>
+                    {wk.count === 0 ? (
+                      <p style={{ fontSize: 13.5, color: "var(--ink-soft)", margin: 0 }}>{t.weeklySummaryEmpty}</p>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <p style={{ margin: 0, fontSize: 14 }}><strong>{wk.count}</strong> {t.weeklySummaryCount}</p>
+                        {dominantMoodObj && (
+                          <p style={{ margin: 0, fontSize: 13.5, display: "flex", alignItems: "center", gap: 6 }}>
+                            {t.weeklySummaryDominantMood}
+                            <span style={{ width: 10, height: 10, borderRadius: "50%", background: dominantMoodObj.color, display: "inline-block" }} />
+                            {t.moods[wk.dominantMood]}
+                          </p>
+                        )}
+                        {wk.avgIntensity && (
+                          <p style={{ margin: 0, fontSize: 13.5, display: "flex", alignItems: "center", gap: 6 }}>
+                            {t.weeklySummaryAvgIntensity} <IntensityDots value={Math.round(wk.avgIntensity)} /> ({wk.avgIntensity}/5)
+                          </p>
+                        )}
+                        {wk.topTags.length > 0 && (
+                          <p style={{ margin: 0, fontSize: 13.5 }}>
+                            {t.weeklySummaryTopTags} {wk.topTags.map((tg) => (lang === "id" ? TAGS.find((x) => x.key === tg)?.id_ : TAGS.find((x) => x.key === tg)?.en)).join(", ")}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              <input
+                className="rf-input"
+                style={{ width: "100%", boxSizing: "border-box", marginBottom: 12 }}
+                placeholder={t.journalSearchPh}
+                value={journalQuery}
+                onChange={(e) => setJournalQuery(e.target.value)}
+              />
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>{t.filterByTag}</span>
+                <button
+                  onClick={() => setTagFilter(null)}
+                  style={{ background: !tagFilter ? "var(--clay)" : "transparent", color: !tagFilter ? "var(--paper)" : "var(--ink-soft)", border: "1px solid var(--line)", borderRadius: 999, padding: "3px 10px", fontSize: 11.5, cursor: "pointer" }}
+                >
+                  {t.filterAllTags}
+                </button>
+                {TAGS.map((tg) => (
+                  <button
+                    key={tg.key}
+                    onClick={() => setTagFilter((cur) => (cur === tg.key ? null : tg.key))}
+                    style={{ background: tagFilter === tg.key ? "var(--clay)" : "transparent", color: tagFilter === tg.key ? "var(--paper)" : "var(--ink-soft)", border: "1px solid var(--line)", borderRadius: 999, padding: "3px 10px", fontSize: 11.5, cursor: "pointer" }}
+                  >
+                    {lang === "id" ? tg.id_ : tg.en}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginTop: 14 }}>
               <button onClick={() => setCalendarOpen((v) => !v)} className="rf-btn" style={{ background: "transparent", border: "1px solid var(--line)", color: "var(--ink-soft)", padding: "7px 14px", fontSize: 13 }}>
                 {calendarOpen ? t.calendarClose : t.calendarToggle}
               </button>
@@ -2580,9 +2820,13 @@ export default function Reflection() {
 
             <div style={{ marginTop: 20 }}>
               {(() => {
-                const visibleEntries = selectedDate ? entries.filter((e) => sameDay(e.ts, selectedDate)) : entries;
+                const q = journalQuery.trim().toLowerCase();
+                let visibleEntries = selectedDate ? entries.filter((e) => sameDay(e.ts, selectedDate)) : entries;
+                if (tagFilter) visibleEntries = visibleEntries.filter((e) => (e.tags || []).includes(tagFilter));
+                if (q) visibleEntries = visibleEntries.filter((e) => e.text.toLowerCase().includes(q) || (e.title || "").toLowerCase().includes(q));
                 if (visibleEntries.length === 0) {
-                  return <p style={{ color: "var(--ink-soft)" }}>{selectedDate ? t.calendarNoEntries : t.empty_journal}</p>;
+                  const reason = q || tagFilter ? t.journalSearchNoResults : (selectedDate ? t.calendarNoEntries : t.empty_journal);
+                  return <p style={{ color: "var(--ink-soft)" }}>{reason}</p>;
                 }
                 return (
                   <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -2593,9 +2837,10 @@ export default function Reflection() {
                       return (
                         <div key={e.id} className="rf-card" style={{ padding: 18 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                               <span style={{ width: 10, height: 10, borderRadius: "50%", background: m.color, display: "inline-block" }} />
                               <span className="rf-mono" style={{ fontSize: 12, color: "var(--ink-soft)" }}>{formatDate(e.ts, lang)} · {t.moods[e.mood]}</span>
+                              <IntensityDots value={e.moodIntensity} color={m.color} />
                               {e.isPublic && <span style={{ fontSize: 10, background: "var(--gold)", color: "var(--paper-card)", padding: "2px 8px", borderRadius: 999 }}>{t.publicBadge}</span>}
                             </div>
                             <button onClick={() => handleDelete(e.id)} style={{ background: "none", border: "none", color: "var(--ink-soft)", fontSize: 12, cursor: "pointer" }}>{t.deleteEntry}</button>
@@ -2604,6 +2849,18 @@ export default function Reflection() {
                           <MediaBlock url={e.mediaUrl} type={e.mediaType} alt={e.title} />
                           <p style={{ margin: 0, lineHeight: 1.6, fontSize: 15, whiteSpace: "pre-wrap" }}>{isLong && !expanded ? e.text.slice(0, 220) + "…" : e.text}</p>
                           {isLong && <button onClick={() => setExpandedEntry(expanded ? null : e.id)} style={{ background: "none", border: "none", color: "var(--clay-dark)", fontSize: 13, marginTop: 6, cursor: "pointer", padding: 0 }}>{expanded ? t.readLess : t.readMore}</button>}
+                          {e.tags && e.tags.length > 0 && (
+                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+                              {e.tags.map((tg) => {
+                                const tgObj = TAGS.find((x) => x.key === tg);
+                                return (
+                                  <span key={tg} style={{ fontSize: 11, color: "var(--ink-soft)", border: "1px solid var(--line)", borderRadius: 999, padding: "2px 9px" }}>
+                                    #{tgObj ? (lang === "id" ? tgObj.id_ : tgObj.en) : tg}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
