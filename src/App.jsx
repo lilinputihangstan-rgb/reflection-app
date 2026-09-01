@@ -104,6 +104,11 @@ const T = {
     draftRestoredNote: "Draf sebelumnya dipulihkan otomatis.",
     draftSavedNote: "Draf tersimpan otomatis",
     dangerZoneTitle: "Zona Berbahaya",
+    exportTitle: "Ekspor Data",
+    exportDesc: "Unduh semua refleksimu buat disimpan sendiri atau dipindah ke aplikasi lain.",
+    exportMarkdownBtn: "⬇️ Unduh sebagai Markdown (.md)",
+    exportJsonBtn: "⬇️ Unduh sebagai JSON (.json)",
+    exportEmpty: "Belum ada refleksi buat diekspor.",
     deleteAccountBtn: "Hapus Akun Saya",
     deleteAccountWarning: "Ini akan menghapus akun kamu secara permanen, termasuk semua refleksi, post, dan data profil. Tindakan ini tidak bisa dibatalkan.",
     deleteAccountConfirmPh: "Ketik HAPUS untuk konfirmasi",
@@ -335,6 +340,11 @@ const T = {
     draftRestoredNote: "Your previous draft was restored automatically.",
     draftSavedNote: "Draft auto-saved",
     dangerZoneTitle: "Danger Zone",
+    exportTitle: "Export Data",
+    exportDesc: "Download all your reflections to keep for yourself or move to another app.",
+    exportMarkdownBtn: "⬇️ Download as Markdown (.md)",
+    exportJsonBtn: "⬇️ Download as JSON (.json)",
+    exportEmpty: "No reflections to export yet.",
     deleteAccountBtn: "Delete My Account",
     deleteAccountWarning: "This permanently deletes your account, including all reflections, posts, and profile data. This cannot be undone.",
     deleteAccountConfirmPh: "Type DELETE to confirm",
@@ -1783,6 +1793,36 @@ export default function Reflection() {
     }
   };
 
+  const downloadFile = (filename, content, mimeType) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAsMarkdown = () => {
+    const sorted = [...entries].sort((a, b) => a.ts - b.ts);
+    const lines = [`# Reflection — ${myProfile?.displayName || ""}`, ""];
+    sorted.forEach((e) => {
+      lines.push(`## ${formatDate(e.ts, lang)}${e.title ? " — " + e.title : ""}`);
+      lines.push(`*${t.moods[e.mood]} (${e.moodIntensity || 3}/5)${e.tags?.length ? " · " + e.tags.join(", ") : ""}*`);
+      lines.push("");
+      lines.push(e.text);
+      lines.push("");
+    });
+    downloadFile("reflection-export.md", lines.join("\n"), "text/markdown");
+  };
+
+  const exportAsJson = () => {
+    const sorted = [...entries].sort((a, b) => a.ts - b.ts);
+    downloadFile("reflection-export.json", JSON.stringify(sorted, null, 2), "application/json");
+  };
+
   const stopPreset = useCallback((key) => {
     const st = toneRef.current;
     const entry = st.presets[key];
@@ -2941,6 +2981,22 @@ export default function Reflection() {
                           </div>
                         ))}
                       </div>
+                    </div>
+                    <div className="rf-card" style={{ padding: 22, marginBottom: 20 }}>
+                      <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 6px" }}>{t.exportTitle}</p>
+                      <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>{t.exportDesc}</p>
+                      {entries.length === 0 ? (
+                        <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: 0 }}>{t.exportEmpty}</p>
+                      ) : (
+                        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                          <button onClick={exportAsMarkdown} style={{ background: "var(--paper)", border: "1px solid var(--line)", color: "var(--ink)", padding: "8px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer" }}>
+                            {t.exportMarkdownBtn}
+                          </button>
+                          <button onClick={exportAsJson} style={{ background: "var(--paper)", border: "1px solid var(--line)", color: "var(--ink)", padding: "8px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer" }}>
+                            {t.exportJsonBtn}
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="rf-card" style={{ padding: 22, marginBottom: 28, border: "1px solid rgba(181,101,74,0.35)" }}>
                       <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 6px", color: "#B5654A" }}>{t.dangerZoneTitle}</p>
