@@ -143,6 +143,12 @@ const T = {
     weeklySummaryDominantMood: "Mood yang paling sering muncul:",
     weeklySummaryAvgIntensity: "Rata-rata intensitas:",
     weeklySummaryTopTags: "Topik yang sering muncul:",
+    actionStepLabel: "Langkah kecil buat besok (opsional)",
+    actionStepPlaceholder: "Satu hal kecil dan realistis yang bisa kamu lakukan…",
+    actionStepPending: "Langkah yang Belum Selesai",
+    actionStepPendingEmpty: "Nggak ada langkah yang nunggu ditindaklanjuti. Mantap!",
+    actionStepDone: "Selesai",
+    actionStepBadge: "🎯 Langkah:",
     empty_journal: "Belum ada refleksi. Tulisan pertamamu akan muncul di sini.",
     streak: "hari beruntun",
     totalEntries: "total refleksi",
@@ -384,6 +390,12 @@ const T = {
     weeklySummaryDominantMood: "Most frequent mood:",
     weeklySummaryAvgIntensity: "Average intensity:",
     weeklySummaryTopTags: "Common topics:",
+    actionStepLabel: "One small step for tomorrow (optional)",
+    actionStepPlaceholder: "One small, realistic thing you could do…",
+    actionStepPending: "Pending Steps",
+    actionStepPendingEmpty: "No steps waiting to be done. Nice!",
+    actionStepDone: "Done",
+    actionStepBadge: "🎯 Step:",
     empty_journal: "No reflections yet. Your first entry will appear here.",
     streak: "day streak",
     totalEntries: "total entries",
@@ -737,6 +749,8 @@ function mapEntryRow(row) {
     tags: row.tags || [],
     text: row.text,
     title: row.title || "",
+    actionStep: row.action_step || "",
+    actionDone: !!row.action_done,
     mediaUrl: row.media_url || null,
     mediaType: row.media_type || null,
     promptId: row.prompt_id,
@@ -1143,6 +1157,7 @@ export default function Reflection() {
   const [title, setTitle] = useState("");
   const [moodIntensity, setMoodIntensity] = useState(3);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [actionStep, setActionStep] = useState("");
   const [journalQuery, setJournalQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(true);
@@ -1634,6 +1649,7 @@ export default function Reflection() {
           tags: selectedTags.length ? selectedTags : null,
           text: text.trim(),
           title: title.trim() || null,
+          action_step: actionStep.trim() || null,
           media_url: mediaUrl,
           media_type: mType,
           prompt_id: currentPrompt.id,
@@ -1652,7 +1668,7 @@ export default function Reflection() {
         });
       }
       setText(""); setTitle(""); clearMedia(); setPublish(false); setSaveState("saved");
-      setMoodIntensity(3); setSelectedTags([]);
+      setMoodIntensity(3); setSelectedTags([]); setActionStep("");
       clearDraft();
       dismissOnboarding();
       setTimeout(() => setSaveState("idle"), 2500);
@@ -1671,6 +1687,13 @@ export default function Reflection() {
     setViewedPosts((prev) => prev.filter((p) => p.entryId !== id));
     try {
       await supabase.from("journal_entries").delete().eq("id", id);
+    } catch (e) {}
+  };
+
+  const toggleActionDone = async (id, currentDone) => {
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, actionDone: !currentDone } : e)));
+    try {
+      await supabase.from("journal_entries").update({ action_done: !currentDone }).eq("id", id);
     } catch (e) {}
   };
 
@@ -2817,6 +2840,17 @@ export default function Reflection() {
             </div>
 
             <div style={{ marginTop: 12 }}>
+              <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 8px" }}>{t.actionStepLabel}</p>
+              <input
+                className="rf-input"
+                style={{ width: "100%", boxSizing: "border-box" }}
+                placeholder={t.actionStepPlaceholder}
+                value={actionStep}
+                onChange={(e) => setActionStep(e.target.value)}
+              />
+            </div>
+
+            <div style={{ marginTop: 12 }}>
               {!mediaPreview ? (
                 <label className="rf-btn" style={{ display: "inline-flex", background: "transparent", border: "1px dashed var(--line)", color: "var(--ink-soft)", padding: "9px 16px", fontSize: 13, cursor: "pointer" }}>
                   {t.mediaAttachLabel}
@@ -2884,6 +2918,24 @@ export default function Reflection() {
                 );
               })()}
             </div>
+
+            {(() => {
+              const pending = entries.filter((e) => e.actionStep && !e.actionDone);
+              if (pending.length === 0) return null;
+              return (
+                <div className="rf-card" style={{ padding: 18, marginBottom: 20 }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: "var(--clay-dark)", margin: "0 0 10px" }}>{t.actionStepPending}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {pending.map((e) => (
+                      <label key={e.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer" }}>
+                        <input type="checkbox" checked={false} onChange={() => toggleActionDone(e.id, e.actionDone)} style={{ marginTop: 3 }} />
+                        <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>{e.actionStep}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             <div style={{ marginTop: 20 }}>
               <input
@@ -2978,6 +3030,14 @@ export default function Reflection() {
                                 );
                               })}
                             </div>
+                          )}
+                          {e.actionStep && (
+                            <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 12, padding: "10px 12px", background: "var(--paper)", borderRadius: 10, cursor: "pointer" }}>
+                              <input type="checkbox" checked={e.actionDone} onChange={() => toggleActionDone(e.id, e.actionDone)} style={{ marginTop: 2 }} />
+                              <span style={{ fontSize: 13, lineHeight: 1.5, textDecoration: e.actionDone ? "line-through" : "none", color: e.actionDone ? "var(--ink-soft)" : "var(--ink)" }}>
+                                <strong>{t.actionStepBadge}</strong> {e.actionStep}
+                              </span>
+                            </label>
                           )}
                         </div>
                       );
