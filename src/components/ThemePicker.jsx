@@ -12,6 +12,8 @@ export default function ThemePicker({
   labelScene,
   labelFont,
   lang,
+  sceneLabels = {},
+  fontLabels = {},
 }) {
   return (
     <div className="rf-card" style={{ padding: 16, marginTop: 14 }}>
@@ -42,26 +44,29 @@ export default function ThemePicker({
 
       <p style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-soft)", margin: "0 0 8px" }}>{labelScene}</p>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-        {scenes.map((s) => (
-          <button
-            key={s.key}
-            type="button"
-            onClick={() => onSelectScene(s.key)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "6px 10px",
-              borderRadius: 999,
-              cursor: "pointer",
-              background: "var(--paper-card)",
-              border: sceneKey === s.key ? "2px solid var(--clay)" : "1px solid var(--line)",
-            }}
-          >
-            <span style={{ fontSize: 14 }}>{s.icon}</span>
-            <span style={{ fontSize: 12, color: "var(--ink-soft)" }}>{s.labelKey ? (lang === "id" ? s.labelKey : s.labelKey) : ""}</span>
-          </button>
-        ))}
+        {scenes.map((s) => {
+          const label = sceneLabels[s.key] || s.labelKey || s.key;
+          return (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => onSelectScene(s.key)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                background: "var(--paper-card)",
+                border: sceneKey === s.key ? "2px solid var(--clay)" : "1px solid var(--line)",
+              }}
+            >
+              <span style={{ fontSize: 14 }}>{s.icon}</span>
+              <span style={{ fontSize: 12, color: "var(--ink-soft)" }}>{label}</span>
+            </button>
+          );
+        })}
       </div>
 
       <p style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-soft)", margin: "0 0 8px" }}>{labelFont}</p>
@@ -82,7 +87,7 @@ export default function ThemePicker({
               color: "var(--ink)",
             }}
           >
-            {f.labelKey}
+            {fontLabels[f.key] || f.labelKey}
           </button>
         ))}
       </div>
