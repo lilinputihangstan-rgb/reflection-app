@@ -1,3 +1,7 @@
+export { default as ProfileStats } from "./ProfileStats";
+export { default as NavigationTabs } from "./NavigationTabs";
+export { default as SearchBar } from "./SearchBar";
+export { default as FeedCard } from "./FeedCard";
 export { default as ThemeSwatch } from "./ThemeSwatch";
 export { default as SectionCard } from "./SectionCard";
 export { default as StatusPill } from "./StatusPill";
