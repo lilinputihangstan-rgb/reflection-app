@@ -1,3 +1,4 @@
+export { default as ThemeSwatch } from "./ThemeSwatch";
 export { default as SectionCard } from "./SectionCard";
 export { default as StatusPill } from "./StatusPill";
 export { default as Avatar } from "./Avatar";
