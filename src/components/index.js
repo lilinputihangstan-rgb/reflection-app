@@ -1,3 +1,4 @@
+export { default as AppShell } from "./AppShell";
 export { default as ActionButton } from "./ActionButton";
 export { default as FilterChips } from "./FilterChips";
 export { default as MetaRow } from "./MetaRow";
