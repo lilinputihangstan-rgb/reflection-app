@@ -1,8 +1,13 @@
+export { default as MoodSelector } from "./MoodSelector";
+export { default as LogCard } from "./LogCard";
 export { default as ProfileStats } from "./ProfileStats";
 export { default as NavigationTabs } from "./NavigationTabs";
 export { default as SearchBar } from "./SearchBar";
 export { default as FeedCard } from "./FeedCard";
 export { default as ThemeSwatch } from "./ThemeSwatch";
+export { default as ThemePicker } from "./ThemePicker";
+export { default as ReflectionHeader } from "./ReflectionHeader";
+export { default as JournalComposer } from "./JournalComposer";
 export { default as SectionCard } from "./SectionCard";
 export { default as StatusPill } from "./StatusPill";
 export { default as Avatar } from "./Avatar";
